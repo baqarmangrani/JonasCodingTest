@@ -2,6 +2,7 @@
 using DataAccessLayer.Model.Models;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace DataAccessLayer.Repositories
 {
@@ -14,20 +15,21 @@ namespace DataAccessLayer.Repositories
             _companyDbWrapper = companyDbWrapper;
         }
 
-        public IEnumerable<Company> GetAll()
+        public async Task<IEnumerable<Company>> GetAllAsync()
         {
-            return _companyDbWrapper.FindAll();
+            return await _companyDbWrapper.FindAllAsync();
         }
 
-        public Company GetByCode(string companyCode)
+        public async Task<Company> GetByCodeAsync(string companyCode)
         {
-            return _companyDbWrapper.Find(t => t.CompanyCode.Equals(companyCode))?.FirstOrDefault();
+            var companies = await _companyDbWrapper.FindAsync(t => t.CompanyCode.Equals(companyCode));
+            return companies?.FirstOrDefault();
         }
 
-        public bool SaveCompany(Company company)
+        public async Task<bool> SaveCompanyAsync(Company company)
         {
-            var itemRepo = _companyDbWrapper.Find(t =>
-                t.SiteId.Equals(company.SiteId) && t.CompanyCode.Equals(company.CompanyCode))?.FirstOrDefault();
+            var itemRepo = (await _companyDbWrapper.FindAsync(t =>
+                t.SiteId.Equals(company.SiteId) && t.CompanyCode.Equals(company.CompanyCode)))?.FirstOrDefault();
             if (itemRepo != null)
             {
                 itemRepo.CompanyName = company.CompanyName;
@@ -40,17 +42,15 @@ namespace DataAccessLayer.Repositories
                 itemRepo.PhoneNumber = company.PhoneNumber;
                 itemRepo.PostalZipCode = company.PostalZipCode;
                 itemRepo.LastModified = company.LastModified;
-                return _companyDbWrapper.Update(itemRepo);
+                return await _companyDbWrapper.UpdateAsync(itemRepo);
             }
 
-            return _companyDbWrapper.Insert(company);
+            return await _companyDbWrapper.InsertAsync(company);
         }
 
-        public bool UpdateByCode(string companyCode, Company company)
+        public async Task<bool> UpdateByCodeAsync(string companyCode, Company company)
         {
-            bool isSuccess = false;
-
-            var itemRepo = _companyDbWrapper.Find(t => t.CompanyCode.Equals(companyCode))?.FirstOrDefault();
+            var itemRepo = (await _companyDbWrapper.FindAsync(t => t.CompanyCode.Equals(companyCode)))?.FirstOrDefault();
 
             if (itemRepo != null)
             {
@@ -64,19 +64,16 @@ namespace DataAccessLayer.Repositories
                 itemRepo.PhoneNumber = company.PhoneNumber;
                 itemRepo.PostalZipCode = company.PostalZipCode;
                 itemRepo.LastModified = company.LastModified;
-                isSuccess = _companyDbWrapper.Update(itemRepo);
+
+                return await _companyDbWrapper.UpdateAsync(itemRepo);
             }
 
-            return isSuccess;
+            return false;
         }
 
-        public bool DeleteByCode(string companyCode)
+        public async Task<bool> DeleteByCodeAsync(string companyCode)
         {
-            bool isSuccess = false;
-
-            isSuccess = _companyDbWrapper.Delete(t => t.CompanyCode.Equals(companyCode));
-
-            return isSuccess;
+            return await _companyDbWrapper.DeleteAsync(t => t.CompanyCode.Equals(companyCode));
         }
     }
 }

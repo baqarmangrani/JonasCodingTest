@@ -2,6 +2,8 @@
 using BusinessLayer.Model.Interfaces;
 using BusinessLayer.Model.Models;
 using System.Collections.Generic;
+using System.Net;
+using System.Threading.Tasks;
 using System.Web.Http;
 using WebApi.Models;
 
@@ -21,18 +23,18 @@ namespace WebApi.Controllers
 
         // GET api/company
         [HttpGet]
-        public IHttpActionResult GetAll()
+        public async Task<IHttpActionResult> GetAll()
         {
-            var items = _companyService.GetAllCompanies();
+            var items = await _companyService.GetAllCompaniesAsync();
             var companyDtos = _mapper.Map<IEnumerable<CompanyDto>>(items);
             return Ok(companyDtos);
         }
 
         // GET api/company/{companyCode}
         [HttpGet, Route("{companyCode}", Name = "GetCompanyByCode")]
-        public IHttpActionResult Get(string companyCode)
+        public async Task<IHttpActionResult> Get(string companyCode)
         {
-            var item = _companyService.GetCompanyByCode(companyCode);
+            var item = await _companyService.GetCompanyByCodeAsync(companyCode);
             if (item == null)
             {
                 return NotFound();
@@ -43,7 +45,7 @@ namespace WebApi.Controllers
 
         // POST api/company
         [HttpPost]
-        public IHttpActionResult Post([FromBody] CompanyDto companyDto)
+        public async Task<IHttpActionResult> Post([FromBody] CompanyDto companyDto)
         {
             if (companyDto == null)
             {
@@ -51,7 +53,7 @@ namespace WebApi.Controllers
             }
 
             var companyInfo = _mapper.Map<CompanyInfo>(companyDto);
-            var result = _companyService.AddCompany(companyInfo);
+            var result = await _companyService.AddCompanyAsync(companyInfo);
             if (!result)
             {
                 return InternalServerError();
@@ -63,7 +65,7 @@ namespace WebApi.Controllers
 
         // PUT api/company/{companyCode}
         [HttpPut, Route("{companyCode}")]
-        public IHttpActionResult Put(string companyCode, [FromBody] CompanyDto companyDto)
+        public async Task<IHttpActionResult> Put(string companyCode, [FromBody] CompanyDto companyDto)
         {
             if (companyDto == null)
             {
@@ -71,24 +73,24 @@ namespace WebApi.Controllers
             }
 
             var companyInfo = _mapper.Map<CompanyInfo>(companyDto);
-            var result = _companyService.UpdateCompanyByCode(companyCode, companyInfo);
+            var result = await _companyService.UpdateCompanyByCodeAsync(companyCode, companyInfo);
             if (!result)
             {
                 return NotFound();
             }
-            return StatusCode(System.Net.HttpStatusCode.NoContent);
+            return StatusCode(HttpStatusCode.NoContent);
         }
 
         // DELETE api/company/{companyCode}
         [HttpDelete, Route("{companyCode}")]
-        public IHttpActionResult Delete(string companyCode)
+        public async Task<IHttpActionResult> Delete(string companyCode)
         {
-            var result = _companyService.DeleteCompanyByCode(companyCode);
+            var result = await _companyService.DeleteCompanyByCodeAsync(companyCode);
             if (!result)
             {
                 return NotFound();
             }
-            return StatusCode(System.Net.HttpStatusCode.NoContent);
+            return StatusCode(HttpStatusCode.NoContent);
         }
     }
 }

@@ -4,6 +4,7 @@ using BusinessLayer.Model.Models;
 using DataAccessLayer.Model.Interfaces;
 using DataAccessLayer.Model.Models;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace BusinessLayer.Services
 {
@@ -18,33 +19,33 @@ namespace BusinessLayer.Services
             _mapper = mapper;
         }
 
-        public IEnumerable<CompanyInfo> GetAllCompanies()
+        public async Task<IEnumerable<CompanyInfo>> GetAllCompaniesAsync()
         {
-            var res = _companyRepository.GetAll();
+            var res = await _companyRepository.GetAllAsync();
             return _mapper.Map<IEnumerable<CompanyInfo>>(res);
         }
 
-        public CompanyInfo GetCompanyByCode(string companyCode)
+        public async Task<CompanyInfo> GetCompanyByCodeAsync(string companyCode)
         {
-            var result = _companyRepository.GetByCode(companyCode);
+            var result = await _companyRepository.GetByCodeAsync(companyCode);
             return _mapper.Map<CompanyInfo>(result);
         }
 
-        public bool AddCompany(CompanyInfo companyInfo)
+        public async Task<bool> AddCompanyAsync(CompanyInfo companyInfo)
         {
             var company = _mapper.Map<Company>(companyInfo);
-            return _companyRepository.SaveCompany(company);
+            return await _companyRepository.SaveCompanyAsync(company);
         }
 
-        public bool UpdateCompanyByCode(string companyCode, CompanyInfo companyInfo)
+        public async Task<bool> UpdateCompanyByCodeAsync(string companyCode, CompanyInfo companyInfo)
         {
             var company = _mapper.Map<Company>(companyInfo);
-            return _companyRepository.UpdateByCode(companyCode, company);
+            return await _companyRepository.UpdateByCodeAsync(companyCode, company);
         }
 
-        public bool DeleteCompanyByCode(string companyCode)
+        public async Task<bool> DeleteCompanyByCodeAsync(string companyCode)
         {
-            return _companyRepository.DeleteByCode(companyCode);
+            return await _companyRepository.DeleteByCodeAsync(companyCode);
         }
     }
 }

@@ -1,14 +1,15 @@
 ﻿using BusinessLayer.Model.Models;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace BusinessLayer.Model.Interfaces
 {
     public interface ICompanyService
     {
-        IEnumerable<CompanyInfo> GetAllCompanies();
-        CompanyInfo GetCompanyByCode(string companyCode);
-        bool AddCompany(CompanyInfo companyInfo);
-        bool UpdateCompanyByCode(string companyCode, CompanyInfo companyInfo);
-        bool DeleteCompanyByCode(string companyCode);
+        Task<IEnumerable<CompanyInfo>> GetAllCompaniesAsync();
+        Task<CompanyInfo> GetCompanyByCodeAsync(string companyCode);
+        Task<bool> AddCompanyAsync(CompanyInfo companyInfo);
+        Task<bool> UpdateCompanyByCodeAsync(string companyCode, CompanyInfo companyInfo);
+        Task<bool> DeleteCompanyByCodeAsync(string companyCode);
     }
 }
