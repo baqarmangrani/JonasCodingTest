@@ -11,11 +11,11 @@ namespace DataAccessLayer.Database
 {
     public class InMemoryDatabase<T> : IDbWrapper<T> where T : DataEntity
     {
-        private readonly Dictionary<Tuple<string, string>, DataEntity> _databaseInstance;
+        private static readonly Dictionary<Tuple<string, string>, DataEntity> _databaseInstance =
+            new Dictionary<Tuple<string, string>, DataEntity>();
 
         public InMemoryDatabase()
         {
-            _databaseInstance = new Dictionary<Tuple<string, string>, DataEntity>();
         }
 
         public bool Insert(T data)
