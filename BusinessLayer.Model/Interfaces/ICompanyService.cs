@@ -1,5 +1,5 @@
-﻿using System.Collections.Generic;
-using BusinessLayer.Model.Models;
+﻿using BusinessLayer.Model.Models;
+using System.Collections.Generic;
 
 namespace BusinessLayer.Model.Interfaces
 {
@@ -7,5 +7,8 @@ namespace BusinessLayer.Model.Interfaces
     {
         IEnumerable<CompanyInfo> GetAllCompanies();
         CompanyInfo GetCompanyByCode(string companyCode);
+        bool AddCompany(CompanyInfo companyInfo);
+        bool UpdateCompanyByCode(string companyCode, CompanyInfo companyInfo);
+        bool DeleteCompanyByCode(string companyCode);
     }
 }

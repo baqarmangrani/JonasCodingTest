@@ -1,9 +1,5 @@
-﻿using System;
+﻿using DataAccessLayer.Model.Models;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using DataAccessLayer.Model.Models;
 
 namespace DataAccessLayer.Model.Interfaces
 {
@@ -12,5 +8,7 @@ namespace DataAccessLayer.Model.Interfaces
         IEnumerable<Company> GetAll();
         Company GetByCode(string companyCode);
         bool SaveCompany(Company company);
+        bool UpdateByCode(string companyCode, Company company);
+        bool DeleteByCode(string companyCode);
     }
 }
