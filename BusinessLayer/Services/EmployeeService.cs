@@ -27,37 +27,36 @@ public class EmployeeService : IEmployeeService
 
     public async Task<IEnumerable<EmployeeInfo>> GetAllEmployeesAsync()
     {
+        IEnumerable<EmployeeInfo> employeeInfos = Enumerable.Empty<EmployeeInfo>();
+
         try
         {
             var employees = await _employeeRepository.GetAllAsync();
-            var employeeInfos = _mapper.Map<IEnumerable<EmployeeInfo>>(employees).ToList();
+            employeeInfos = _mapper.Map<IEnumerable<EmployeeInfo>>(employees).ToList();
 
             foreach (var employee in employees)
             {
                 var company = await _companyRepository.GetByCodeAsync(employee.CompanyCode);
                 employeeInfos.First(e => e.EmployeeCode.Equals(employee.EmployeeCode)).CompanyName = company?.CompanyName;
             }
-
-            return employeeInfos;
         }
         catch (ArgumentNullException ex)
         {
             var customEx = new DatabaseException("ArgumentNullException occurred while getting all employees.", ex);
             _logger.Error(customEx, customEx.Message);
-            return Enumerable.Empty<EmployeeInfo>();
         }
         catch (InvalidOperationException ex)
         {
             var customEx = new DatabaseException("InvalidOperationException occurred while getting all employees.", ex);
             _logger.Error(customEx, customEx.Message);
-            return Enumerable.Empty<EmployeeInfo>();
         }
         catch (EmployeeServiceException ex)
         {
             var customEx = new DatabaseException("Error occurred while getting all employees.", ex);
             _logger.Error(customEx, customEx.Message);
-            return Enumerable.Empty<EmployeeInfo>();
         }
+
+        return employeeInfos;
     }
 
     public async Task<EmployeeInfo> GetEmployeeByCodeAsync(string employeeCode)
@@ -99,118 +98,126 @@ public class EmployeeService : IEmployeeService
 
     public async Task<SaveResult> AddEmployeeAsync(EmployeeInfo employeeInfo)
     {
+        SaveResult saveResult = new SaveResult(false, "An error occurred while adding the employee.");
+
         try
         {
             var company = await _companyRepository.GetByNameAsync(employeeInfo.CompanyName);
 
             if (company == null)
             {
-                return new SaveResult(false, "Company of that Employee is not found.");
+                saveResult = new SaveResult(false, "Company of that Employee is not found.");
             }
+            else
+            {
+                var employee = _mapper.Map<Employee>(employeeInfo);
 
-            var employee = _mapper.Map<Employee>(employeeInfo);
+                employee.CompanyCode = company.CompanyCode;
+                employee.SiteId = company.SiteId;
 
-            employee.CompanyCode = company.CompanyCode;
-            employee.SiteId = company.SiteId;
+                var result = await _employeeRepository.SaveEmployeeAsync(employee);
 
-            var result = await _employeeRepository.SaveEmployeeAsync(employee);
-
-            return new SaveResult(result.Success, result.Message);
+                saveResult = new SaveResult(result.Success, result.Message);
+            }
         }
         catch (ArgumentNullException ex)
         {
             var customEx = new DatabaseException("ArgumentNullException occurred while adding an employee.", ex);
             _logger.Error(customEx, customEx.Message);
-            return new SaveResult(false, "Invalid input provided.");
+            saveResult = new SaveResult(false, "Invalid input provided.");
         }
         catch (InvalidOperationException ex)
         {
             var customEx = new DatabaseException("InvalidOperationException occurred while adding an employee.", ex);
             _logger.Error(customEx, customEx.Message);
-            return new SaveResult(false, "Operation could not be completed.");
+            saveResult = new SaveResult(false, "Operation could not be completed.");
         }
         catch (EmployeeServiceException ex)
         {
             var customEx = new DatabaseException("Error occurred while adding an employee.", ex);
             _logger.Error(customEx, customEx.Message);
-            return new SaveResult(false, "An error occurred while adding the employee.");
         }
+
+        return saveResult;
     }
 
     public async Task<SaveResult> UpdateEmployeeByCodeAsync(string employeeCode, EmployeeInfo employeeInfo)
     {
+        SaveResult saveResult = new SaveResult(false, "An error occurred while updating the employee.");
+
         try
         {
             var company = await _companyRepository.GetByNameAsync(employeeInfo.CompanyName);
 
             if (company == null)
             {
-                return new SaveResult(false, $"Company with name {employeeInfo.CompanyName} not found.");
+                saveResult = new SaveResult(false, $"Company with name {employeeInfo.CompanyName} not found.");
             }
-
-            var employee = _mapper.Map<Employee>(employeeInfo);
-
-            employee.CompanyCode = company.CompanyCode;
-            employee.SiteId = company.SiteId;
-
-            var result = await _employeeRepository.UpdateByCodeAsync(employeeCode, employee);
-
-            if (!result.Success)
+            else
             {
-                _logger.Warning($"Employee with code {employeeCode} not found.");
-            }
+                var employee = _mapper.Map<Employee>(employeeInfo);
 
-            return new SaveResult(result.Success, result.Message);
+                employee.CompanyCode = company.CompanyCode;
+                employee.SiteId = company.SiteId;
+
+                var result = await _employeeRepository.UpdateByCodeAsync(employeeCode, employee);
+
+                if (!result.Success)
+                {
+                    _logger.Warning($"Employee with code {employeeCode} not found.");
+                }
+
+                saveResult = new SaveResult(result.Success, result.Message);
+            }
         }
         catch (ArgumentNullException ex)
         {
             var customEx = new DatabaseException("ArgumentNullException occurred while updating the employee.", ex);
             _logger.Error(customEx, customEx.Message);
-            return new SaveResult(false, "Invalid input provided.");
+            saveResult = new SaveResult(false, "Invalid input provided.");
         }
         catch (InvalidOperationException ex)
         {
             var customEx = new DatabaseException("InvalidOperationException occurred while updating the employee.", ex);
             _logger.Error(customEx, customEx.Message);
-            return new SaveResult(false, "Operation could not be completed.");
+            saveResult = new SaveResult(false, "Operation could not be completed.");
         }
         catch (EmployeeServiceException ex)
         {
             var customEx = new DatabaseException("Error occurred while updating the employee.", ex);
             _logger.Error(customEx, customEx.Message);
-            return new SaveResult(false, "An error occurred while updating the employee.");
         }
+
+        return saveResult;
     }
 
     public async Task<bool> DeleteEmployeeByCodeAsync(string employeeCode)
     {
+        bool result = false;
         try
         {
-            var result = await _employeeRepository.DeleteByCodeAsync(employeeCode);
+            result = await _employeeRepository.DeleteByCodeAsync(employeeCode);
             if (!result)
             {
                 _logger.Warning($"Employee with code {employeeCode} not found.");
             }
-
-            return result;
         }
         catch (ArgumentNullException ex)
         {
             var customEx = new DatabaseException("ArgumentNullException occurred while deleting employee by code.", ex);
             _logger.Error(customEx, customEx.Message);
-            return false;
         }
         catch (InvalidOperationException ex)
         {
             var customEx = new DatabaseException("InvalidOperationException occurred while deleting employee by code.", ex);
             _logger.Error(customEx, customEx.Message);
-            return false;
         }
         catch (EmployeeServiceException ex)
         {
             var customEx = new DatabaseException($"Error occurred while deleting employee by code: {employeeCode}", ex);
             _logger.Error(customEx, customEx.Message);
-            return false;
         }
+
+        return result;
     }
 }
