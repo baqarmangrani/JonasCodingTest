@@ -18,42 +18,31 @@ public class CompanyService : ICompanyService
 
     public CompanyService(ICompanyRepository companyRepository, IMapper mapper, ILogger logger)
     {
-        _companyRepository = companyRepository;
-        _mapper = mapper;
-        _logger = logger;
+        _companyRepository = companyRepository ?? throw new ArgumentNullException(nameof(companyRepository));
+        _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
     public async Task<IEnumerable<CompanyInfo>> GetAllCompaniesAsync()
     {
-        IEnumerable<CompanyInfo> result;
-
         try
         {
             var companies = await _companyRepository.GetAllAsync();
-            result = _mapper.Map<IEnumerable<CompanyInfo>>(companies);
+            return _mapper.Map<IEnumerable<CompanyInfo>>(companies);
         }
-        catch (ArgumentNullException ex)
-        {
-            _logger.Error(new DatabaseException("ArgumentNullException occurred while getting all companies.", ex), "ArgumentNullException occurred while getting all companies.");
-            result = Enumerable.Empty<CompanyInfo>();
-        }
-        catch (InvalidOperationException ex)
-        {
-            _logger.Error(new DatabaseException("InvalidOperationException occurred while getting all companies.", ex), "InvalidOperationException occurred while getting all companies.");
-            result = Enumerable.Empty<CompanyInfo>();
-        }
-        catch (CompanyServiceException ex)
+        catch (Exception ex) when (ex is ArgumentNullException || ex is InvalidOperationException || ex is CompanyServiceException)
         {
             _logger.Error(new DatabaseException("Error occurred while getting all companies.", ex), "Error occurred while getting all companies.");
-            result = Enumerable.Empty<CompanyInfo>();
+            return Enumerable.Empty<CompanyInfo>();
         }
-
-        return result;
     }
 
     public async Task<CompanyInfo> GetCompanyByCodeAsync(string companyCode)
     {
-        CompanyInfo companyInfo = null;
+        if (string.IsNullOrWhiteSpace(companyCode))
+        {
+            throw new ArgumentException("Company code cannot be null or empty.", nameof(companyCode));
+        }
 
         try
         {
@@ -61,60 +50,48 @@ public class CompanyService : ICompanyService
             if (company == null)
             {
                 _logger.Warning($"Company with code {companyCode} not found.");
+                return null;
             }
-            else
-            {
-                companyInfo = _mapper.Map<CompanyInfo>(company);
-            }
+            return _mapper.Map<CompanyInfo>(company);
         }
-        catch (ArgumentNullException ex)
-        {
-            _logger.Error(new DatabaseException("ArgumentNullException occurred while getting company by code.", ex), "ArgumentNullException occurred while getting company by code.");
-        }
-        catch (InvalidOperationException ex)
-        {
-            _logger.Error(new DatabaseException("InvalidOperationException occurred while getting company by code.", ex), "InvalidOperationException occurred while getting company by code.");
-        }
-        catch (CompanyServiceException ex)
+        catch (Exception ex) when (ex is ArgumentNullException || ex is InvalidOperationException || ex is CompanyServiceException)
         {
             _logger.Error(new DatabaseException($"Error occurred while getting company by code: {companyCode}", ex), $"Error occurred while getting company by code: {companyCode}");
+            return null;
         }
-
-        return companyInfo;
     }
 
     public async Task<SaveResult> AddCompanyAsync(CompanyInfo companyInfo)
     {
-        SaveResult result;
+        if (companyInfo == null)
+        {
+            throw new ArgumentNullException(nameof(companyInfo));
+        }
 
         try
         {
             var company = _mapper.Map<Company>(companyInfo);
             var saveResult = await _companyRepository.SaveCompanyAsync(company);
-            result = new SaveResult(saveResult.Success, saveResult.Message);
+            return new SaveResult(saveResult.Success, saveResult.Message);
         }
-        catch (ArgumentNullException ex)
-        {
-            _logger.Error(new DatabaseException("ArgumentNullException occurred while adding a company.", ex), "ArgumentNullException occurred while adding a company.");
-            result = new SaveResult(false, "Invalid input provided.");
-        }
-        catch (InvalidOperationException ex)
-        {
-            _logger.Error(new DatabaseException("InvalidOperationException occurred while adding a company.", ex), "InvalidOperationException occurred while adding a company.");
-            result = new SaveResult(false, "Operation could not be completed.");
-        }
-        catch (CompanyServiceException ex)
+        catch (Exception ex) when (ex is ArgumentNullException || ex is InvalidOperationException || ex is CompanyServiceException)
         {
             _logger.Error(new DatabaseException("Error occurred while adding a company.", ex), "Error occurred while adding a company.");
-            result = new SaveResult(false, "An error occurred while adding the company.");
+            return new SaveResult(false, "An error occurred while adding the company.");
         }
-
-        return result;
     }
 
     public async Task<SaveResult> UpdateCompanyByCodeAsync(string companyCode, CompanyInfo companyInfo)
     {
-        SaveResult result;
+        if (string.IsNullOrWhiteSpace(companyCode))
+        {
+            throw new ArgumentException("Company code cannot be null or empty.", nameof(companyCode));
+        }
+
+        if (companyInfo == null)
+        {
+            throw new ArgumentNullException(nameof(companyInfo));
+        }
 
         try
         {
@@ -123,56 +100,37 @@ public class CompanyService : ICompanyService
             if (!updateResult)
             {
                 _logger.Warning($"Company with code {companyCode} not found.");
+                return new SaveResult(false, "Failed to update company.");
             }
-            result = new SaveResult(updateResult, updateResult ? "Company updated successfully." : "Failed to update company.");
+            return new SaveResult(true, "Company updated successfully.");
         }
-        catch (ArgumentNullException ex)
-        {
-            _logger.Error(new DatabaseException("ArgumentNullException occurred while updating the company.", ex), "ArgumentNullException occurred while updating the company.");
-            result = new SaveResult(false, "Invalid input provided.");
-        }
-        catch (InvalidOperationException ex)
-        {
-            _logger.Error(new DatabaseException("InvalidOperationException occurred while updating the company.", ex), "InvalidOperationException occurred while updating the company.");
-            result = new SaveResult(false, "Operation could not be completed.");
-        }
-        catch (CompanyServiceException ex)
+        catch (Exception ex) when (ex is ArgumentNullException || ex is InvalidOperationException || ex is CompanyServiceException)
         {
             _logger.Error(new DatabaseException("Error occurred while updating the company.", ex), "Error occurred while updating the company.");
-            result = new SaveResult(false, "An error occurred while updating the company.");
+            return new SaveResult(false, "An error occurred while updating the company.");
         }
-
-        return result;
     }
 
     public async Task<bool> DeleteCompanyByCodeAsync(string companyCode)
     {
-        bool result;
+        if (string.IsNullOrWhiteSpace(companyCode))
+        {
+            throw new ArgumentException("Company code cannot be null or empty.", nameof(companyCode));
+        }
 
         try
         {
-            result = await _companyRepository.DeleteByCodeAsync(companyCode);
+            var result = await _companyRepository.DeleteByCodeAsync(companyCode);
             if (!result)
             {
                 _logger.Warning($"Company with code {companyCode} not found.");
             }
+            return result;
         }
-        catch (ArgumentNullException ex)
-        {
-            _logger.Error(new DatabaseException("ArgumentNullException occurred while deleting company by code.", ex), "ArgumentNullException occurred while deleting company by code.");
-            result = false;
-        }
-        catch (InvalidOperationException ex)
-        {
-            _logger.Error(new DatabaseException("InvalidOperationException occurred while deleting company by code.", ex), "InvalidOperationException occurred while deleting company by code.");
-            result = false;
-        }
-        catch (CompanyServiceException ex)
+        catch (Exception ex) when (ex is ArgumentNullException || ex is InvalidOperationException || ex is CompanyServiceException)
         {
             _logger.Error(new DatabaseException($"Error occurred while deleting company by code: {companyCode}", ex), $"Error occurred while deleting company by code: {companyCode}");
-            result = false;
+            return false;
         }
-
-        return result;
     }
 }

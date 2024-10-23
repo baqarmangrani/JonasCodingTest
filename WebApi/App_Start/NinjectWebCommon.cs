@@ -71,6 +71,13 @@ namespace WebApi.App_Start
         /// <param name="kernel">The kernel.</param>
         private static void RegisterServices(IKernel kernel)
         {
+            ConfigureLogging(kernel);
+            ConfigureAutoMapper(kernel);
+            BindServices(kernel);
+        }
+
+        private static void ConfigureLogging(IKernel kernel)
+        {
             var logDirectory = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "logs");
 
             if (!Directory.Exists(logDirectory))
@@ -84,7 +91,10 @@ namespace WebApi.App_Start
                 .CreateLogger();
 
             kernel.Bind<ILogger>().ToMethod(context => Log.Logger).InSingletonScope();
+        }
 
+        private static void ConfigureAutoMapper(IKernel kernel)
+        {
             kernel.Bind<IMapper>().ToMethod(context =>
             {
                 var config = new MapperConfiguration(cfg =>
@@ -95,7 +105,10 @@ namespace WebApi.App_Start
                 });
                 return config.CreateMapper();
             }).InSingletonScope();
+        }
 
+        private static void BindServices(IKernel kernel)
+        {
             kernel.Bind<ICompanyService>().To<CompanyService>();
             kernel.Bind<IEmployeeService>().To<EmployeeService>();
             kernel.Bind<ICompanyRepository>().To<CompanyRepository>();

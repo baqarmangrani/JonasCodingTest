@@ -15,124 +15,88 @@ namespace DataAccessLayer.Repositories
 
         public CompanyRepository(IDbWrapper<Company> companyDbWrapper, ILogger logger)
         {
-            _companyDbWrapper = companyDbWrapper;
-            _logger = logger;
+            _companyDbWrapper = companyDbWrapper ?? throw new ArgumentNullException(nameof(companyDbWrapper));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
         public async Task<IEnumerable<Company>> GetAllAsync()
         {
-            try
-            {
-                return await _companyDbWrapper.FindAllAsync();
-            }
-            catch (Exception ex)
-            {
-                _logger.Error(ex, "Error occurred while getting all companies.");
-                throw;
-            }
+            return await ExecuteDbOperationAsync(() => _companyDbWrapper.FindAllAsync(), "Error occurred while getting all companies.");
         }
 
         public async Task<Company> GetByCodeAsync(string companyCode)
         {
-            try
-            {
-                var companies = await _companyDbWrapper.FindAsync(t => t.CompanyCode.Equals(companyCode));
-                return companies?.FirstOrDefault();
-            }
-            catch (Exception ex)
-            {
-                _logger.Error(ex, "Error occurred while getting company by code: {CompanyCode}", companyCode);
-                throw;
-            }
+            return (await ExecuteDbOperationAsync(() => _companyDbWrapper.FindAsync(t => t.CompanyCode.Equals(companyCode)),
+                $"Error occurred while getting company by code: {companyCode}"))?.FirstOrDefault();
         }
 
         public async Task<SaveResultData> SaveCompanyAsync(Company company)
         {
-            try
+            return await ExecuteDbOperationAsync(async () =>
             {
-                var itemRepo = (await _companyDbWrapper.FindAsync(t =>
-                    t.SiteId.Equals(company.SiteId) && t.CompanyCode.Equals(company.CompanyCode)))?.FirstOrDefault();
-
-                if (itemRepo != null)
+                var existingCompany = (await _companyDbWrapper.FindAsync(t => t.SiteId.Equals(company.SiteId) && t.CompanyCode.Equals(company.CompanyCode)))?.FirstOrDefault();
+                if (existingCompany != null)
                 {
-                    return new SaveResultData
-                    {
-                        Success = false,
-                        Message = "Company already exists with the same code."
-                    };
+                    return new SaveResultData { Success = false, Message = "Company already exists with the same code." };
                 }
 
                 var insertResult = await _companyDbWrapper.InsertAsync(company);
-
-                return new SaveResultData
-                {
-                    Success = insertResult,
-                    Message = insertResult ? "Company saved successfully." : "Failed to save company."
-                };
-            }
-            catch (Exception ex)
-            {
-                _logger.Error(ex, "Error occurred while saving company: {Company}", company);
-                throw;
-            }
+                return new SaveResultData { Success = insertResult, Message = insertResult ? "Company saved successfully." : "Failed to save company." };
+            }, $"Error occurred while saving company: {company}");
         }
 
         public async Task<bool> UpdateByCodeAsync(string companyCode, Company company)
         {
-            try
+            return await ExecuteDbOperationAsync(async () =>
             {
-                var itemRepo = (await _companyDbWrapper.FindAsync(t => t.CompanyCode.Equals(companyCode)))?.FirstOrDefault();
-
-                if (itemRepo != null)
+                var existingCompany = (await _companyDbWrapper.FindAsync(t => t.CompanyCode.Equals(companyCode)))?.FirstOrDefault();
+                if (existingCompany == null)
                 {
-                    itemRepo.CompanyName = company.CompanyName;
-                    itemRepo.AddressLine1 = company.AddressLine1;
-                    itemRepo.AddressLine2 = company.AddressLine2;
-                    itemRepo.AddressLine3 = company.AddressLine3;
-                    itemRepo.Country = company.Country;
-                    itemRepo.EquipmentCompanyCode = company.EquipmentCompanyCode;
-                    itemRepo.FaxNumber = company.FaxNumber;
-                    itemRepo.PhoneNumber = company.PhoneNumber;
-                    itemRepo.PostalZipCode = company.PostalZipCode;
-                    itemRepo.LastModified = company.LastModified;
-
-                    return await _companyDbWrapper.UpdateAsync(itemRepo);
+                    return false;
                 }
 
-                return false;
-            }
-            catch (Exception ex)
-            {
-                _logger.Error(ex, "Error occurred while updating company by code: {CompanyCode}", companyCode);
-                throw;
-            }
+                UpdateCompanyDetails(existingCompany, company);
+                return await _companyDbWrapper.UpdateAsync(existingCompany);
+            }, $"Error occurred while updating company by code: {companyCode}");
         }
 
         public async Task<bool> DeleteByCodeAsync(string companyCode)
         {
-            try
-            {
-                return await _companyDbWrapper.DeleteAsync(t => t.CompanyCode.Equals(companyCode));
-            }
-            catch (Exception ex)
-            {
-                _logger.Error(ex, "Error occurred while deleting company by code: {CompanyCode}", companyCode);
-                throw;
-            }
+            return await ExecuteDbOperationAsync(() => _companyDbWrapper.DeleteAsync(t => t.CompanyCode.Equals(companyCode)),
+                $"Error occurred while deleting company by code: {companyCode}");
         }
 
         public async Task<Company> GetByNameAsync(string companyName)
         {
+            return (await ExecuteDbOperationAsync(() => _companyDbWrapper.FindAsync(t => t.CompanyName.Equals(companyName)),
+                $"Error occurred while getting company by name: {companyName}"))?.FirstOrDefault();
+        }
+
+        private async Task<T> ExecuteDbOperationAsync<T>(Func<Task<T>> dbOperation, string errorMessage)
+        {
             try
             {
-                var companies = await _companyDbWrapper.FindAsync(t => t.CompanyName.Equals(companyName));
-                return companies?.FirstOrDefault();
+                return await dbOperation();
             }
             catch (Exception ex)
             {
-                _logger.Error(ex, "Error occurred while getting company by name: {CompanyName}", companyName);
+                _logger.Error(ex, errorMessage);
                 throw;
             }
+        }
+
+        private void UpdateCompanyDetails(Company existingCompany, Company newCompany)
+        {
+            existingCompany.CompanyName = newCompany.CompanyName;
+            existingCompany.AddressLine1 = newCompany.AddressLine1;
+            existingCompany.AddressLine2 = newCompany.AddressLine2;
+            existingCompany.AddressLine3 = newCompany.AddressLine3;
+            existingCompany.Country = newCompany.Country;
+            existingCompany.EquipmentCompanyCode = newCompany.EquipmentCompanyCode;
+            existingCompany.FaxNumber = newCompany.FaxNumber;
+            existingCompany.PhoneNumber = newCompany.PhoneNumber;
+            existingCompany.PostalZipCode = newCompany.PostalZipCode;
+            existingCompany.LastModified = newCompany.LastModified;
         }
     }
 }

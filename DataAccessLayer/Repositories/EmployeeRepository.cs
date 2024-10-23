@@ -15,45 +15,29 @@ namespace DataAccessLayer.Repositories
 
         public EmployeeRepository(IDbWrapper<Employee> employeeDbWrapper, ILogger logger)
         {
-            _employeeDbWrapper = employeeDbWrapper;
-            _logger = logger;
+            _employeeDbWrapper = employeeDbWrapper ?? throw new ArgumentNullException(nameof(employeeDbWrapper));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
         public async Task<IEnumerable<Employee>> GetAllAsync()
         {
-            try
-            {
-                return await _employeeDbWrapper.FindAllAsync();
-            }
-            catch (Exception ex)
-            {
-                _logger.Error(ex, "Error occurred while getting all employees.");
-                throw;
-            }
+            return await ExecuteDbOperationAsync(() => _employeeDbWrapper.FindAllAsync(), "getting all employees");
         }
 
         public async Task<Employee> GetByCodeAsync(string employeeCode)
         {
-            try
-            {
-                var result = await _employeeDbWrapper.FindAsync(t => t.EmployeeCode.Equals(employeeCode));
-                return result?.FirstOrDefault();
-            }
-            catch (Exception ex)
-            {
-                _logger.Error(ex, "Error occurred while getting employee by code: {EmployeeCode}", employeeCode);
-                throw;
-            }
+            return (await ExecuteDbOperationAsync(() => _employeeDbWrapper.FindAsync(t => t.EmployeeCode.Equals(employeeCode)),
+                $"getting employee by code: {employeeCode}"))?.FirstOrDefault();
         }
 
         public async Task<SaveResultData> SaveEmployeeAsync(Employee employee)
         {
-            try
+            return await ExecuteDbOperationAsync(async () =>
             {
-                var itemRepo = (await _employeeDbWrapper.FindAsync(t =>
+                var existingEmployee = (await _employeeDbWrapper.FindAsync(t =>
                     t.SiteId.Equals(employee.SiteId) && t.EmployeeCode.Equals(employee.EmployeeCode)))?.FirstOrDefault();
 
-                if (itemRepo != null)
+                if (existingEmployee != null)
                 {
                     return new SaveResultData
                     {
@@ -63,62 +47,66 @@ namespace DataAccessLayer.Repositories
                 }
 
                 var insertResult = await _employeeDbWrapper.InsertAsync(employee);
-
                 return new SaveResultData
                 {
                     Success = insertResult,
                     Message = insertResult ? "Employee saved successfully." : "Failed to save employee."
                 };
-            }
-            catch (Exception ex)
-            {
-                _logger.Error(ex, "Error occurred while saving employee: {Employee}", employee);
-                throw;
-            }
+            }, $"saving employee: {employee}");
         }
 
         public async Task<SaveResultData> UpdateByCodeAsync(string employeeCode, Employee employee)
         {
-            try
+            return await ExecuteDbOperationAsync(async () =>
             {
-                bool updateResult = false;
-                var itemRepo = (await _employeeDbWrapper.FindAsync(t => t.EmployeeCode.Equals(employeeCode)))?.FirstOrDefault();
-                if (itemRepo != null)
+                var existingEmployee = (await _employeeDbWrapper.FindAsync(t => t.EmployeeCode.Equals(employeeCode)))?.FirstOrDefault();
+                if (existingEmployee == null)
                 {
-                    itemRepo.EmployeeName = employee.EmployeeName;
-                    itemRepo.Occupation = employee.Occupation;
-                    itemRepo.EmployeeStatus = employee.EmployeeStatus;
-                    itemRepo.EmailAddress = employee.EmailAddress;
-                    itemRepo.Phone = employee.Phone;
-                    itemRepo.LastModified = employee.LastModified;
-
-                    updateResult = await _employeeDbWrapper.UpdateAsync(itemRepo);
+                    return new SaveResultData
+                    {
+                        Success = false,
+                        Message = "Employee not found."
+                    };
                 }
+
+                UpdateEmployeeDetails(existingEmployee, employee);
+                var updateResult = await _employeeDbWrapper.UpdateAsync(existingEmployee);
 
                 return new SaveResultData
                 {
                     Success = updateResult,
                     Message = updateResult ? "Employee updated successfully." : "Failed to update employee."
                 };
-            }
-            catch (Exception ex)
-            {
-                _logger.Error(ex, "Error occurred while updating employee by code: {EmployeeCode}", employeeCode);
-                throw;
-            }
+            }, $"updating employee by code: {employeeCode}");
         }
 
         public async Task<bool> DeleteByCodeAsync(string employeeCode)
         {
+            return await ExecuteDbOperationAsync(() => _employeeDbWrapper.DeleteAsync(t => t.EmployeeCode.Equals(employeeCode)),
+                $"deleting employee by code: {employeeCode}");
+        }
+
+        private async Task<T> ExecuteDbOperationAsync<T>(Func<Task<T>> dbOperation, string operationDescription)
+        {
             try
             {
-                return await _employeeDbWrapper.DeleteAsync(t => t.EmployeeCode.Equals(employeeCode));
+                return await dbOperation();
             }
             catch (Exception ex)
             {
-                _logger.Error(ex, "Error occurred while deleting employee by code: {EmployeeCode}", employeeCode);
+                _logger.Error(ex, $"Error occurred while {operationDescription}.");
                 throw;
             }
+        }
+
+        private void UpdateEmployeeDetails(Employee existingEmployee, Employee newEmployee)
+        {
+            existingEmployee.EmployeeName = newEmployee.EmployeeName;
+            existingEmployee.Occupation = newEmployee.Occupation;
+            existingEmployee.EmployeeStatus = newEmployee.EmployeeStatus;
+            existingEmployee.EmailAddress = newEmployee.EmailAddress;
+            existingEmployee.Phone = newEmployee.Phone;
+            existingEmployee.LastModified = newEmployee.LastModified;
         }
     }
 }

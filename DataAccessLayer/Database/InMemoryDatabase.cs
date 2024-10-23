@@ -10,16 +10,11 @@ using System.Threading.Tasks;
 
 public class InMemoryDatabase<T> : IDbWrapper<T> where T : DataEntity
 {
-    private static readonly Dictionary<Tuple<string, string>, DataEntity> _databaseInstance =
-        new Dictionary<Tuple<string, string>, DataEntity>();
-
-    public InMemoryDatabase()
-    {
-    }
+    private static readonly Dictionary<Tuple<string, string>, DataEntity> _databaseInstance = new Dictionary<Tuple<string, string>, DataEntity>();
 
     public bool Insert(T data)
     {
-        try
+        return ExecuteDatabaseOperation(() =>
         {
             var key = Tuple.Create(data.SiteId, data.CompanyCode);
             if (_databaseInstance.ContainsKey(key))
@@ -30,17 +25,12 @@ public class InMemoryDatabase<T> : IDbWrapper<T> where T : DataEntity
             _databaseInstance.Add(key, data);
             Log.Information($"Insert: Added entity with SiteId: {data.SiteId}, CompanyCode: {data.CompanyCode}");
             return true;
-        }
-        catch (Exception ex)
-        {
-            Log.Error(ex, $"Insert: Failed to add entity with SiteId: {data.SiteId}, CompanyCode: {data.CompanyCode}. Exception: {ex.Message}");
-            return false;
-        }
+        }, $"Insert: Failed to add entity with SiteId: {data.SiteId}, CompanyCode: {data.CompanyCode}");
     }
 
     public bool Update(T data)
     {
-        try
+        return ExecuteDatabaseOperation(() =>
         {
             var key = Tuple.Create(data.SiteId, data.CompanyCode);
             if (_databaseInstance.ContainsKey(key))
@@ -51,48 +41,33 @@ public class InMemoryDatabase<T> : IDbWrapper<T> where T : DataEntity
             }
             Log.Error($"Update: Entity with SiteId: {data.SiteId}, CompanyCode: {data.CompanyCode} not found");
             return false;
-        }
-        catch (Exception ex)
-        {
-            Log.Error(ex, $"Update: Failed to update entity with SiteId: {data.SiteId}, CompanyCode: {data.CompanyCode}. Exception: {ex.Message}");
-            return false;
-        }
+        }, $"Update: Failed to update entity with SiteId: {data.SiteId}, CompanyCode: {data.CompanyCode}");
     }
 
     public IEnumerable<T> Find(Expression<Func<T, bool>> expression)
     {
-        try
+        return ExecuteDatabaseOperation(() =>
         {
             var entities = FindAll();
             var result = entities.Where(expression.Compile());
             Log.Information($"Find: Found {result.Count()} entities matching the criteria");
             return result;
-        }
-        catch (Exception ex)
-        {
-            Log.Error(ex, $"Find: Failed to find entities. Exception: {ex.Message}");
-            return Enumerable.Empty<T>();
-        }
+        }, "Find: Failed to find entities");
     }
 
     public IEnumerable<T> FindAll()
     {
-        try
+        return ExecuteDatabaseOperation(() =>
         {
             var result = _databaseInstance.Values.OfType<T>();
             Log.Information($"FindAll: Found {result.Count()} entities");
             return result;
-        }
-        catch (Exception ex)
-        {
-            Log.Error(ex, $"FindAll: Failed to retrieve entities. Exception: {ex.Message}");
-            return Enumerable.Empty<T>();
-        }
+        }, "FindAll: Failed to retrieve entities");
     }
 
     public bool Delete(Expression<Func<T, bool>> expression)
     {
-        try
+        return ExecuteDatabaseOperation(() =>
         {
             var entities = Find(expression);
             foreach (var dataEntity in entities)
@@ -101,32 +76,22 @@ public class InMemoryDatabase<T> : IDbWrapper<T> where T : DataEntity
                 Log.Information($"Delete: Removed entity with SiteId: {dataEntity.SiteId}, CompanyCode: {dataEntity.CompanyCode}");
             }
             return true;
-        }
-        catch (Exception ex)
-        {
-            Log.Error(ex, $"Delete: Failed to delete entities. Exception: {ex.Message}");
-            return false;
-        }
+        }, "Delete: Failed to delete entities");
     }
 
     public bool DeleteAll()
     {
-        try
+        return ExecuteDatabaseOperation(() =>
         {
             _databaseInstance.Clear();
             Log.Information("DeleteAll: Cleared all entities");
             return true;
-        }
-        catch (Exception ex)
-        {
-            Log.Error(ex, $"DeleteAll: Failed to clear entities. Exception: {ex.Message}");
-            return false;
-        }
+        }, "DeleteAll: Failed to clear entities");
     }
 
     public bool UpdateAll(Expression<Func<T, bool>> filter, string fieldToUpdate, object newValue)
     {
-        try
+        return ExecuteDatabaseOperation(() =>
         {
             var entities = Find(filter);
             foreach (var dataEntity in entities)
@@ -136,60 +101,38 @@ public class InMemoryDatabase<T> : IDbWrapper<T> where T : DataEntity
                 Log.Information($"UpdateAll: Updated entity with SiteId: {dataEntity.SiteId}, CompanyCode: {dataEntity.CompanyCode}");
             }
             return true;
-        }
-        catch (Exception ex)
-        {
-            Log.Error(ex, $"UpdateAll: Failed to update entities. Exception: {ex.Message}");
-            return false;
-        }
+        }, "UpdateAll: Failed to update entities");
     }
 
     private T UpdateProperty(T dataEntity, string key, object value)
     {
-        Type t = typeof(T);
-        var prop = t.GetProperty(key, BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance);
-
+        var prop = typeof(T).GetProperty(key, BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance);
         if (prop == null)
         {
             throw new Exception("Property not found");
         }
-
         prop.SetValue(dataEntity, value, null);
         return dataEntity;
     }
 
-    public async Task<bool> InsertAsync(T data)
-    {
-        return await Task.FromResult(Insert(data));
-    }
+    public Task<bool> InsertAsync(T data) => Task.FromResult(Insert(data));
+    public Task<bool> UpdateAsync(T data) => Task.FromResult(Update(data));
+    public Task<IEnumerable<T>> FindAsync(Expression<Func<T, bool>> expression) => Task.FromResult(Find(expression));
+    public Task<IEnumerable<T>> FindAllAsync() => Task.FromResult(FindAll());
+    public Task<bool> DeleteAsync(Expression<Func<T, bool>> expression) => Task.FromResult(Delete(expression));
+    public Task<bool> DeleteAllAsync() => Task.FromResult(DeleteAll());
+    public Task<bool> UpdateAllAsync(Expression<Func<T, bool>> filter, string fieldToUpdate, object newValue) => Task.FromResult(UpdateAll(filter, fieldToUpdate, newValue));
 
-    public async Task<bool> UpdateAsync(T data)
+    private TResult ExecuteDatabaseOperation<TResult>(Func<TResult> operation, string errorMessage)
     {
-        return await Task.FromResult(Update(data));
-    }
-
-    public async Task<IEnumerable<T>> FindAsync(Expression<Func<T, bool>> expression)
-    {
-        return await Task.FromResult(Find(expression));
-    }
-
-    public async Task<IEnumerable<T>> FindAllAsync()
-    {
-        return await Task.FromResult(FindAll());
-    }
-
-    public async Task<bool> DeleteAsync(Expression<Func<T, bool>> expression)
-    {
-        return await Task.FromResult(Delete(expression));
-    }
-
-    public async Task<bool> DeleteAllAsync()
-    {
-        return await Task.FromResult(DeleteAll());
-    }
-
-    public async Task<bool> UpdateAllAsync(Expression<Func<T, bool>> filter, string fieldToUpdate, object newValue)
-    {
-        return await Task.FromResult(UpdateAll(filter, fieldToUpdate, newValue));
+        try
+        {
+            return operation();
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, $"{errorMessage}. Exception: {ex.Message}");
+            return default;
+        }
     }
 }

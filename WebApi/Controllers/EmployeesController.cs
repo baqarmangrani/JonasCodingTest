@@ -20,33 +20,28 @@ namespace WebApi.Controllers
 
         public EmployeesController(IEmployeeService employeeService, IMapper mapper, ILogger logger)
         {
-            _employeeService = employeeService;
-            _mapper = mapper;
-            _logger = logger;
+            _employeeService = employeeService ?? throw new ArgumentNullException(nameof(employeeService));
+            _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
         // GET api/employees
         [HttpGet]
         public async Task<IHttpActionResult> GetAll()
         {
-            try
+            return await ExecuteAsync(async () =>
             {
                 var items = await _employeeService.GetAllEmployeesAsync();
                 var employeeDtos = _mapper.Map<IEnumerable<EmployeeDto>>(items);
                 return Ok(employeeDtos);
-            }
-            catch (Exception ex)
-            {
-                _logger.Error(ex, "Error occurred while getting all employees.");
-                return InternalServerError(new Exception("An error occurred while processing your request."));
-            }
+            }, "Error occurred while getting all employees.");
         }
 
         // GET api/employees/{employeeCode}
         [HttpGet, Route("{employeeCode}", Name = "GetEmployeeByCode")]
         public async Task<IHttpActionResult> Get(string employeeCode)
         {
-            try
+            return await ExecuteAsync(async () =>
             {
                 var item = await _employeeService.GetEmployeeByCodeAsync(employeeCode);
                 if (item == null)
@@ -55,12 +50,7 @@ namespace WebApi.Controllers
                 }
                 var employeeDto = _mapper.Map<EmployeeDto>(item);
                 return Ok(employeeDto);
-            }
-            catch (Exception ex)
-            {
-                _logger.Error(ex, $"Error occurred while getting employee with code {employeeCode}.");
-                return InternalServerError(new Exception("An error occurred while processing your request."));
-            }
+            }, $"Error occurred while getting employee with code {employeeCode}.");
         }
 
         // POST api/employees
@@ -72,7 +62,7 @@ namespace WebApi.Controllers
                 return BadRequest("Request is null");
             }
 
-            try
+            return await ExecuteAsync(async () =>
             {
                 var employeeInfo = _mapper.Map<EmployeeInfo>(employeeDto);
                 var result = await _employeeService.AddEmployeeAsync(employeeInfo);
@@ -83,12 +73,7 @@ namespace WebApi.Controllers
                 }
 
                 return CreatedAtRoute("GetEmployeeByCode", new { employeeCode = employeeInfo.EmployeeCode }, employeeDto);
-            }
-            catch (Exception ex)
-            {
-                _logger.Error(ex, "Error occurred while adding a new employee.");
-                return InternalServerError(new Exception("An error occurred while processing your request."));
-            }
+            }, "Error occurred while adding a new employee.");
         }
 
         // PUT api/employees/{employeeCode}
@@ -100,7 +85,7 @@ namespace WebApi.Controllers
                 return BadRequest("Employee data is null");
             }
 
-            try
+            return await ExecuteAsync(async () =>
             {
                 var employeeInfo = _mapper.Map<EmployeeInfo>(employeeDto);
                 var result = await _employeeService.UpdateEmployeeByCodeAsync(employeeCode, employeeInfo);
@@ -111,19 +96,14 @@ namespace WebApi.Controllers
                 }
 
                 return StatusCode(HttpStatusCode.NoContent);
-            }
-            catch (Exception ex)
-            {
-                _logger.Error(ex, $"Error occurred while updating employee with code {employeeCode}.");
-                return InternalServerError(new Exception("An error occurred while processing your request."));
-            }
+            }, $"Error occurred while updating employee with code {employeeCode}.");
         }
 
         // DELETE api/employees/{employeeCode}
         [HttpDelete, Route("{employeeCode}")]
         public async Task<IHttpActionResult> Delete(string employeeCode)
         {
-            try
+            return await ExecuteAsync(async () =>
             {
                 var result = await _employeeService.DeleteEmployeeByCodeAsync(employeeCode);
                 if (!result)
@@ -131,10 +111,18 @@ namespace WebApi.Controllers
                     return NotFound();
                 }
                 return StatusCode(HttpStatusCode.NoContent);
+            }, $"Error occurred while deleting employee with code {employeeCode}.");
+        }
+
+        private async Task<IHttpActionResult> ExecuteAsync(Func<Task<IHttpActionResult>> action, string errorMessage)
+        {
+            try
+            {
+                return await action();
             }
             catch (Exception ex)
             {
-                _logger.Error(ex, $"Error occurred while deleting employee with code {employeeCode}.");
+                _logger.Error(ex, errorMessage);
                 return InternalServerError(new Exception("An error occurred while processing your request."));
             }
         }
