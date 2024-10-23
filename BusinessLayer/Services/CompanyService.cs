@@ -40,7 +40,7 @@ namespace BusinessLayer.Services
             catch (Exception ex)
             {
                 _logger.Error(ex, "Error occurred while getting all companies.");
-                throw new CustomException(CustomException.DefaultMessage, ex);
+                throw new CompanyServiceException(CompanyServiceException.DefaultMessage, ex);
             }
         }
 
@@ -57,7 +57,7 @@ namespace BusinessLayer.Services
             }
             catch (NotFoundException ex)
             {
-                _logger.Error(ex, $"Company with code {companyCode} not found.");
+                _logger.Warning(ex, $"Company with code {companyCode} not found.");
                 throw;
             }
             catch (SqlException ex)
@@ -68,7 +68,7 @@ namespace BusinessLayer.Services
             catch (Exception ex)
             {
                 _logger.Error(ex, $"Error occurred while getting company by code: {companyCode}");
-                throw new CustomException(CustomException.DefaultMessage, ex);
+                throw new CompanyServiceException(CompanyServiceException.DefaultMessage, ex);
             }
         }
 
@@ -81,7 +81,7 @@ namespace BusinessLayer.Services
 
                 if (!resultData.Success)
                 {
-                    throw new ConflictException(ConflictException.DefaultMessage);
+                    throw new ConflictException(resultData.Message ?? ConflictException.DefaultMessage);
                 }
 
                 return new SaveResult
@@ -92,7 +92,7 @@ namespace BusinessLayer.Services
             }
             catch (ConflictException ex)
             {
-                _logger.Error(ex, "Conflict occurred while adding a new company.");
+                _logger.Warning(ex, "Conflict occurred while adding a new company.");
                 throw;
             }
             catch (SqlException ex)
@@ -103,7 +103,7 @@ namespace BusinessLayer.Services
             catch (Exception ex)
             {
                 _logger.Error(ex, "Error occurred while adding a new company.");
-                throw new CustomException(CustomException.DefaultMessage, ex);
+                throw new CompanyServiceException(CompanyServiceException.DefaultMessage, ex);
             }
         }
 
@@ -123,7 +123,7 @@ namespace BusinessLayer.Services
             }
             catch (NotFoundException ex)
             {
-                _logger.Error(ex, $"Company with code {companyCode} not found.");
+                _logger.Warning(ex, $"Company with code {companyCode} not found.");
                 throw;
             }
             catch (SqlException ex)
@@ -134,7 +134,7 @@ namespace BusinessLayer.Services
             catch (Exception ex)
             {
                 _logger.Error(ex, $"Error occurred while updating company by code: {companyCode}");
-                throw new CustomException(CustomException.DefaultMessage, ex);
+                throw new CompanyServiceException(CompanyServiceException.DefaultMessage, ex);
             }
         }
 
@@ -153,7 +153,7 @@ namespace BusinessLayer.Services
             }
             catch (NotFoundException ex)
             {
-                _logger.Error(ex, $"Company with code {companyCode} not found.");
+                _logger.Warning(ex, $"Company with code {companyCode} not found.");
                 throw;
             }
             catch (SqlException ex)
@@ -164,7 +164,7 @@ namespace BusinessLayer.Services
             catch (Exception ex)
             {
                 _logger.Error(ex, $"Error occurred while deleting company by code: {companyCode}");
-                throw new CustomException(CustomException.DefaultMessage, ex);
+                throw new CompanyServiceException(CompanyServiceException.DefaultMessage, ex);
             }
         }
     }
