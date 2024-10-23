@@ -77,7 +77,7 @@ namespace WebApi.Controllers
                 var employeeInfo = _mapper.Map<EmployeeInfo>(employeeDto);
                 var result = await _employeeService.AddEmployeeAsync(employeeInfo);
 
-                if (!result.Success)
+                if (!result.IsSuccess)
                 {
                     return Content(HttpStatusCode.Conflict, result.Message);
                 }
@@ -104,10 +104,12 @@ namespace WebApi.Controllers
             {
                 var employeeInfo = _mapper.Map<EmployeeInfo>(employeeDto);
                 var result = await _employeeService.UpdateEmployeeByCodeAsync(employeeCode, employeeInfo);
-                if (!result)
+
+                if (!result.IsSuccess)
                 {
-                    return NotFound();
+                    return Content(HttpStatusCode.NotFound, result.Message);
                 }
+
                 return StatusCode(HttpStatusCode.NoContent);
             }
             catch (Exception ex)

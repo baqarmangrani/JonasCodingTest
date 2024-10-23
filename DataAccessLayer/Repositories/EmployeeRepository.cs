@@ -77,10 +77,11 @@ namespace DataAccessLayer.Repositories
             }
         }
 
-        public async Task<bool> UpdateByCodeAsync(string employeeCode, Employee employee)
+        public async Task<SaveResultData> UpdateByCodeAsync(string employeeCode, Employee employee)
         {
             try
             {
+                bool updateResult = false;
                 var itemRepo = (await _employeeDbWrapper.FindAsync(t => t.EmployeeCode.Equals(employeeCode)))?.FirstOrDefault();
                 if (itemRepo != null)
                 {
@@ -90,9 +91,15 @@ namespace DataAccessLayer.Repositories
                     itemRepo.EmailAddress = employee.EmailAddress;
                     itemRepo.Phone = employee.Phone;
                     itemRepo.LastModified = employee.LastModified;
-                    return await _employeeDbWrapper.UpdateAsync(itemRepo);
+
+                    updateResult = await _employeeDbWrapper.UpdateAsync(itemRepo);
                 }
-                return false;
+
+                return new SaveResultData
+                {
+                    Success = updateResult,
+                    Message = updateResult ? "Employee updated successfully." : "Failed to update employee."
+                };
             }
             catch (Exception ex)
             {

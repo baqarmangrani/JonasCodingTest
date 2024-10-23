@@ -84,11 +84,7 @@ namespace BusinessLayer.Services
                     throw new ConflictException(resultData.Message ?? ConflictException.DefaultMessage);
                 }
 
-                return new SaveResult
-                {
-                    Success = resultData.Success,
-                    Message = resultData.Message
-                };
+                return new SaveResult(resultData.Success, resultData.Message);
             }
             catch (ConflictException ex)
             {
@@ -107,7 +103,7 @@ namespace BusinessLayer.Services
             }
         }
 
-        public async Task<bool> UpdateCompanyByCodeAsync(string companyCode, CompanyInfo companyInfo)
+        public async Task<SaveResult> UpdateCompanyByCodeAsync(string companyCode, CompanyInfo companyInfo)
         {
             try
             {
@@ -116,10 +112,10 @@ namespace BusinessLayer.Services
 
                 if (!result)
                 {
-                    throw new NotFoundException($"Company with code {companyCode} not found.");
+                    return new SaveResult(false, $"Company with code {companyCode} not found.");
                 }
 
-                return result;
+                return new SaveResult(true, "Company updated successfully.");
             }
             catch (NotFoundException ex)
             {

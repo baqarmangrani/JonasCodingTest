@@ -9,7 +9,7 @@ namespace DataAccessLayer.Model.Interfaces
         Task<IEnumerable<Employee>> GetAllAsync();
         Task<Employee> GetByCodeAsync(string employeeCode);
         Task<SaveResultData> SaveEmployeeAsync(Employee employee);
-        Task<bool> UpdateByCodeAsync(string employeeCode, Employee employee);
+        Task<SaveResultData> UpdateByCodeAsync(string employeeCode, Employee employee);
         Task<bool> DeleteByCodeAsync(string employeeCode);
     }
 }

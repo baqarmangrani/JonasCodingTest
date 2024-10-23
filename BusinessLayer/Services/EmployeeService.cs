@@ -42,7 +42,7 @@ public class EmployeeService : IEmployeeService
         catch (Exception ex)
         {
             _logger.Error(ex, "Error occurred while getting all employees.");
-            throw;
+            return Enumerable.Empty<EmployeeInfo>();
         }
     }
 
@@ -53,6 +53,7 @@ public class EmployeeService : IEmployeeService
             var employee = await _employeeRepository.GetByCodeAsync(employeeCode);
             if (employee == null)
             {
+                _logger.Warning($"Employee with code {employeeCode} not found.");
                 return null;
             }
 
@@ -65,7 +66,7 @@ public class EmployeeService : IEmployeeService
         catch (Exception ex)
         {
             _logger.Error(ex, $"Error occurred while getting employee by code: {employeeCode}");
-            throw;
+            return null;
         }
     }
 
@@ -77,11 +78,7 @@ public class EmployeeService : IEmployeeService
 
             if (company == null)
             {
-                return new SaveResult
-                {
-                    Success = false,
-                    Message = "Company of that Employeed is not found."
-                };
+                return new SaveResult(false, "Company of that Employee is not found.");
             }
 
             var employee = _mapper.Map<Employee>(employeeInfo);
@@ -89,22 +86,18 @@ public class EmployeeService : IEmployeeService
             employee.CompanyCode = company.CompanyCode;
             employee.SiteId = company.SiteId;
 
-            var resultData = await _employeeRepository.SaveEmployeeAsync(employee);
+            var result = await _employeeRepository.SaveEmployeeAsync(employee);
 
-            return new SaveResult
-            {
-                Success = resultData.Success,
-                Message = resultData.Message
-            };
+            return new SaveResult(result.Success, result.Message);
         }
         catch (Exception ex)
         {
             _logger.Error(ex, "Error occurred while adding an employee.");
-            throw;
+            return new SaveResult(false, "An error occurred while adding the employee.");
         }
     }
 
-    public async Task<bool> UpdateEmployeeByCodeAsync(string employeeCode, EmployeeInfo employeeInfo)
+    public async Task<SaveResult> UpdateEmployeeByCodeAsync(string employeeCode, EmployeeInfo employeeInfo)
     {
         try
         {
@@ -112,7 +105,7 @@ public class EmployeeService : IEmployeeService
 
             if (company == null)
             {
-                return false;
+                return new SaveResult(false, $"Company with name {employeeInfo.CompanyName} not found.");
             }
 
             var employee = _mapper.Map<Employee>(employeeInfo);
@@ -120,12 +113,19 @@ public class EmployeeService : IEmployeeService
             employee.CompanyCode = company.CompanyCode;
             employee.SiteId = company.SiteId;
 
-            return await _employeeRepository.UpdateByCodeAsync(employeeCode, employee);
+            var result = await _employeeRepository.UpdateByCodeAsync(employeeCode, employee);
+
+            if (!result.Success)
+            {
+                _logger.Warning($"Employee with code {employeeCode} not found.");
+            }
+
+            return new SaveResult(result.Success, result.Message);
         }
         catch (Exception ex)
         {
-            _logger.Error(ex, $"Error occurred while updating employee by code: {employeeCode}");
-            throw;
+            _logger.Error(ex, "Error occurred while updating the employee.");
+            return new SaveResult(false, "An error occurred while updating the employee.");
         }
     }
 
@@ -133,12 +133,18 @@ public class EmployeeService : IEmployeeService
     {
         try
         {
-            return await _employeeRepository.DeleteByCodeAsync(employeeCode);
+            var result = await _employeeRepository.DeleteByCodeAsync(employeeCode);
+            if (!result)
+            {
+                _logger.Warning($"Employee with code {employeeCode} not found.");
+            }
+
+            return result;
         }
         catch (Exception ex)
         {
             _logger.Error(ex, $"Error occurred while deleting employee by code: {employeeCode}");
-            throw;
+            return false;
         }
     }
 }

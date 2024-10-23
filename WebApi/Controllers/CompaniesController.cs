@@ -77,7 +77,7 @@ namespace WebApi.Controllers
                 var companyInfo = _mapper.Map<CompanyInfo>(companyDto);
                 var result = await _companyService.AddCompanyAsync(companyInfo);
 
-                if (!result.Success)
+                if (!result.IsSuccess)
                 {
                     return Content(HttpStatusCode.Conflict, result.Message);
                 }
@@ -104,10 +104,12 @@ namespace WebApi.Controllers
             {
                 var companyInfo = _mapper.Map<CompanyInfo>(companyDto);
                 var result = await _companyService.UpdateCompanyByCodeAsync(companyCode, companyInfo);
-                if (!result)
+
+                if (!result.IsSuccess)
                 {
-                    return NotFound();
+                    return Content(HttpStatusCode.NotFound, result.Message);
                 }
+
                 return StatusCode(HttpStatusCode.NoContent);
             }
             catch (Exception ex)
