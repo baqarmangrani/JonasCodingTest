@@ -26,4 +26,11 @@ namespace BusinessLayer.Exceptions
         public CompanyServiceException(string message, Exception innerException)
             : base(message, innerException) { }
     }
+
+    public class EmployeeServiceException : Exception
+    {
+        public const string DefaultMessage = "An error occurred in the Employee Service.";
+        public EmployeeServiceException(string message, Exception innerException)
+            : base(message, innerException) { }
+    }
 }
