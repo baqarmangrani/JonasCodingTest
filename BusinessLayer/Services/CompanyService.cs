@@ -111,7 +111,7 @@ public class CompanyService : ICompanyService
         }
     }
 
-    public async Task<bool> DeleteCompanyByCodeAsync(string companyCode)
+    public async Task<SaveResult> DeleteCompanyByCodeAsync(string companyCode)
     {
         if (string.IsNullOrWhiteSpace(companyCode))
         {
@@ -121,16 +121,19 @@ public class CompanyService : ICompanyService
         try
         {
             var result = await _companyRepository.DeleteByCodeAsync(companyCode);
+
             if (!result)
             {
                 _logger.Warning($"Company with code {companyCode} not found.");
+                return new SaveResult(false, "Company not found.");
             }
-            return result;
+
+            return new SaveResult(true, $"Company with code {companyCode} was successfully deleted.");
         }
         catch (Exception ex) when (ex is ArgumentNullException || ex is InvalidOperationException || ex is CompanyServiceException)
         {
             _logger.Error(new DatabaseException($"Error occurred while deleting company by code: {companyCode}", ex), $"Error occurred while deleting company by code: {companyCode}");
-            return false;
+            return new SaveResult(false, "An error occurred while deleting the company.");
         }
     }
 }

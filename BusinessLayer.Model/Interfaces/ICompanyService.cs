@@ -10,6 +10,6 @@ namespace BusinessLayer.Model.Interfaces
         Task<CompanyInfo> GetCompanyByCodeAsync(string companyCode);
         Task<SaveResult> AddCompanyAsync(CompanyInfo companyInfo);
         Task<SaveResult> UpdateCompanyByCodeAsync(string companyCode, CompanyInfo companyInfo);
-        Task<bool> DeleteCompanyByCodeAsync(string companyCode);
+        Task<SaveResult> DeleteCompanyByCodeAsync(string companyCode);
     }
 }

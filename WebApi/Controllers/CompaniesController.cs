@@ -95,7 +95,7 @@ namespace WebApi.Controllers
                     return Content(HttpStatusCode.NotFound, result.Message);
                 }
 
-                return StatusCode(HttpStatusCode.NoContent);
+                return Ok(new { Message = result.Message });
             }, $"Error occurred while updating company with code {companyCode}.");
         }
 
@@ -106,11 +106,13 @@ namespace WebApi.Controllers
             return await ExecuteAsync(async () =>
             {
                 var result = await _companyService.DeleteCompanyByCodeAsync(companyCode);
-                if (!result)
+
+                if (!result.IsSuccess)
                 {
-                    return NotFound();
+                    return Content(HttpStatusCode.NotFound, result.Message);
                 }
-                return StatusCode(HttpStatusCode.NoContent);
+
+                return Ok(new { Message = result.Message });
             }, $"Error occurred while deleting company with code {companyCode}.");
         }
 
