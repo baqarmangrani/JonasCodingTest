@@ -61,7 +61,7 @@ public class CompanyService : ICompanyService
         }
     }
 
-    public async Task<SaveResult> AddCompanyAsync(CompanyInfo companyInfo)
+    public async Task<Result> AddCompanyAsync(CompanyInfo companyInfo)
     {
         if (companyInfo == null)
         {
@@ -72,16 +72,16 @@ public class CompanyService : ICompanyService
         {
             var company = _mapper.Map<Company>(companyInfo);
             var saveResult = await _companyRepository.SaveCompanyAsync(company);
-            return new SaveResult(saveResult.Success, saveResult.Message);
+            return new Result(saveResult.IsSuccess, saveResult.Message);
         }
         catch (Exception ex) when (ex is ArgumentNullException || ex is InvalidOperationException || ex is CompanyServiceException)
         {
             _logger.Error(new DatabaseException("Error occurred while adding a company.", ex), "Error occurred while adding a company.");
-            return new SaveResult(false, "An error occurred while adding the company.");
+            return new Result(false, "An error occurred while adding the company.");
         }
     }
 
-    public async Task<SaveResult> UpdateCompanyByCodeAsync(string companyCode, CompanyInfo companyInfo)
+    public async Task<Result> UpdateCompanyByCodeAsync(string companyCode, CompanyInfo companyInfo)
     {
         if (string.IsNullOrWhiteSpace(companyCode))
         {
@@ -97,21 +97,21 @@ public class CompanyService : ICompanyService
         {
             var company = _mapper.Map<Company>(companyInfo);
             var updateResult = await _companyRepository.UpdateByCodeAsync(companyCode, company);
-            if (!updateResult)
+            if (!updateResult.IsSuccess)
             {
                 _logger.Warning($"Company with code {companyCode} not found.");
-                return new SaveResult(false, "Failed to update company.");
+                return new Result(false, "Failed to update company.");
             }
-            return new SaveResult(true, "Company updated successfully.");
+            return new Result(true, "Company updated successfully.");
         }
         catch (Exception ex) when (ex is ArgumentNullException || ex is InvalidOperationException || ex is CompanyServiceException)
         {
             _logger.Error(new DatabaseException("Error occurred while updating the company.", ex), "Error occurred while updating the company.");
-            return new SaveResult(false, "An error occurred while updating the company.");
+            return new Result(false, "An error occurred while updating the company.");
         }
     }
 
-    public async Task<SaveResult> DeleteCompanyByCodeAsync(string companyCode)
+    public async Task<Result> DeleteCompanyByCodeAsync(string companyCode)
     {
         if (string.IsNullOrWhiteSpace(companyCode))
         {
@@ -125,15 +125,15 @@ public class CompanyService : ICompanyService
             if (!result)
             {
                 _logger.Warning($"Company with code {companyCode} not found.");
-                return new SaveResult(false, "Company not found.");
+                return new Result(false, "Company not found.");
             }
 
-            return new SaveResult(true, $"Company with code {companyCode} was successfully deleted.");
+            return new Result(true, $"Company with code {companyCode} was successfully deleted.");
         }
         catch (Exception ex) when (ex is ArgumentNullException || ex is InvalidOperationException || ex is CompanyServiceException)
         {
             _logger.Error(new DatabaseException($"Error occurred while deleting company by code: {companyCode}", ex), $"Error occurred while deleting company by code: {companyCode}");
-            return new SaveResult(false, "An error occurred while deleting the company.");
+            return new Result(false, "An error occurred while deleting the company.");
         }
     }
 }

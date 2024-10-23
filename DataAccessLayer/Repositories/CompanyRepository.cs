@@ -1,4 +1,5 @@
-﻿using DataAccessLayer.Model.Interfaces;
+﻿
+using DataAccessLayer.Model.Interfaces;
 using DataAccessLayer.Model.Models;
 using Serilog;
 using System;
@@ -31,33 +32,34 @@ namespace DataAccessLayer.Repositories
             return companies?.FirstOrDefault();
         }
 
-        public async Task<SaveResultData> SaveCompanyAsync(Company company)
+        public async Task<ResultData> SaveCompanyAsync(Company company)
         {
             return await ExecuteDbOperationAsync(async () =>
             {
                 var existingCompany = (await RetryAsync(() => _companyDbWrapper.FindAsync(t => t.SiteId.Equals(company.SiteId) && t.CompanyCode.Equals(company.CompanyCode))))?.FirstOrDefault();
                 if (existingCompany != null)
                 {
-                    return new SaveResultData { Success = false, Message = "Company already exists with the same code." };
+                    return new ResultData { IsSuccess = false, Message = "Company already exists with the same code." };
                 }
 
                 var insertResult = await RetryAsync(() => _companyDbWrapper.InsertAsync(company));
-                return new SaveResultData { Success = insertResult, Message = insertResult ? "Company saved successfully." : "Failed to save company." };
+                return new ResultData { IsSuccess = insertResult, Message = insertResult ? "Company saved successfully." : "Failed to save company." };
             }, $"Error occurred while saving company: {company}");
         }
 
-        public async Task<bool> UpdateByCodeAsync(string companyCode, Company company)
+        public async Task<ResultData> UpdateByCodeAsync(string companyCode, Company company)
         {
             return await ExecuteDbOperationAsync(async () =>
             {
                 var existingCompany = (await RetryAsync(() => _companyDbWrapper.FindAsync(t => t.CompanyCode.Equals(companyCode))))?.FirstOrDefault();
                 if (existingCompany == null)
                 {
-                    return false;
+                    return new ResultData { IsSuccess = false, Message = "Company not found with the provided code." };
                 }
 
                 UpdateCompanyDetails(existingCompany, company);
-                return await RetryAsync(() => _companyDbWrapper.UpdateAsync(existingCompany));
+                var updateResult = await RetryAsync(() => _companyDbWrapper.UpdateAsync(existingCompany));
+                return new ResultData { IsSuccess = updateResult, Message = updateResult ? "Company updated successfully." : "Failed to update company." };
             }, $"Error occurred while updating company by code: {companyCode}");
         }
 

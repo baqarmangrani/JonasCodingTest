@@ -162,7 +162,7 @@
     <Compile Include="Models\Company.cs" />
     <Compile Include="Models\DataEntity.cs" />
     <Compile Include="Models\Employee.cs" />
-    <Compile Include="Models\SaveResultData.cs" />
+    <Compile Include="Models\ResultData.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

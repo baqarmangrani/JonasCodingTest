@@ -161,7 +161,7 @@
     <Compile Include="Models\BaseInfo.cs" />
     <Compile Include="Models\CompanyInfo.cs" />
     <Compile Include="Models\EmployeeInfo.cs" />
-    <Compile Include="Models\SaveResult.cs" />
+    <Compile Include="Models\Result.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -9,8 +9,8 @@ namespace DataAccessLayer.Model.Interfaces
         Task<IEnumerable<Company>> GetAllAsync();
         Task<Company> GetByCodeAsync(string companyCode);
         Task<Company> GetByNameAsync(string companyName);
-        Task<SaveResultData> SaveCompanyAsync(Company company);
-        Task<bool> UpdateByCodeAsync(string companyCode, Company company);
+        Task<ResultData> SaveCompanyAsync(Company company);
+        Task<ResultData> UpdateByCodeAsync(string companyCode, Company company);
         Task<bool> DeleteByCodeAsync(string companyCode);
     }
 }

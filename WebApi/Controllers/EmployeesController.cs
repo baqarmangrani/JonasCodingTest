@@ -46,6 +46,7 @@ namespace WebApi.Controllers
                 var item = await _employeeService.GetEmployeeByCodeAsync(employeeCode);
                 if (item == null)
                 {
+                    _logger.Warning($"Employee with code {employeeCode} not found.");
                     return NotFound();
                 }
                 var employeeDto = _mapper.Map<EmployeeDto>(item);
@@ -69,6 +70,7 @@ namespace WebApi.Controllers
 
                 if (!result.IsSuccess)
                 {
+                    _logger.Warning($"Failed to add employee: {result.Message}");
                     return Content(HttpStatusCode.Conflict, result.Message);
                 }
 
@@ -92,6 +94,7 @@ namespace WebApi.Controllers
 
                 if (!result.IsSuccess)
                 {
+                    _logger.Warning($"Failed to update employee with code {employeeCode}: {result.Message}");
                     return Content(HttpStatusCode.NotFound, result.Message);
                 }
 
@@ -108,6 +111,7 @@ namespace WebApi.Controllers
                 var result = await _employeeService.DeleteEmployeeByCodeAsync(employeeCode);
                 if (!result)
                 {
+                    _logger.Warning($"Employee with code {employeeCode} not found for deletion.");
                     return NotFound();
                 }
                 return StatusCode(HttpStatusCode.NoContent);

@@ -72,7 +72,7 @@ public class EmployeeService : IEmployeeService
         }
     }
 
-    public async Task<SaveResult> AddEmployeeAsync(EmployeeInfo employeeInfo)
+    public async Task<Result> AddEmployeeAsync(EmployeeInfo employeeInfo)
     {
         if (employeeInfo == null)
         {
@@ -84,7 +84,7 @@ public class EmployeeService : IEmployeeService
             var company = await _companyRepository.GetByNameAsync(employeeInfo.CompanyName);
             if (company == null)
             {
-                return new SaveResult(false, "Company of that Employee is not found.");
+                return new Result(false, "Company of that Employee is not found.");
             }
 
             var employee = _mapper.Map<Employee>(employeeInfo);
@@ -92,16 +92,16 @@ public class EmployeeService : IEmployeeService
             employee.SiteId = company.SiteId;
 
             var result = await _employeeRepository.SaveEmployeeAsync(employee);
-            return new SaveResult(result.Success, result.Message);
+            return new Result(result.IsSuccess, result.Message);
         }
         catch (Exception ex) when (ex is ArgumentNullException || ex is InvalidOperationException || ex is EmployeeServiceException)
         {
             _logger.Error(new DatabaseException("Error occurred while adding an employee.", ex), ex.Message);
-            return new SaveResult(false, "An error occurred while adding the employee.");
+            return new Result(false, "An error occurred while adding the employee.");
         }
     }
 
-    public async Task<SaveResult> UpdateEmployeeByCodeAsync(string employeeCode, EmployeeInfo employeeInfo)
+    public async Task<Result> UpdateEmployeeByCodeAsync(string employeeCode, EmployeeInfo employeeInfo)
     {
         if (employeeInfo == null)
         {
@@ -113,7 +113,7 @@ public class EmployeeService : IEmployeeService
             var company = await _companyRepository.GetByNameAsync(employeeInfo.CompanyName);
             if (company == null)
             {
-                return new SaveResult(false, $"Company with name {employeeInfo.CompanyName} not found.");
+                return new Result(false, $"Company with name {employeeInfo.CompanyName} not found.");
             }
 
             var employee = _mapper.Map<Employee>(employeeInfo);
@@ -121,17 +121,17 @@ public class EmployeeService : IEmployeeService
             employee.SiteId = company.SiteId;
 
             var result = await _employeeRepository.UpdateByCodeAsync(employeeCode, employee);
-            if (!result.Success)
+            if (!result.IsSuccess)
             {
                 _logger.Warning($"Employee with code {employeeCode} not found.");
             }
 
-            return new SaveResult(result.Success, result.Message);
+            return new Result(result.IsSuccess, result.Message);
         }
         catch (Exception ex) when (ex is ArgumentNullException || ex is InvalidOperationException || ex is EmployeeServiceException)
         {
             _logger.Error(new DatabaseException("Error occurred while updating the employee.", ex), ex.Message);
-            return new SaveResult(false, "An error occurred while updating the employee.");
+            return new Result(false, "An error occurred while updating the employee.");
         }
     }
 

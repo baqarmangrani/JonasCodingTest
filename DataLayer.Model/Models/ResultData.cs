@@ -1,8 +1,8 @@
 ﻿namespace DataAccessLayer.Model.Models
 {
-    public class SaveResultData
+    public class ResultData
     {
-        public bool Success { get; set; }
+        public bool IsSuccess { get; set; }
         public string Message { get; set; }
     }
 }
