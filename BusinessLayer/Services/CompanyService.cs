@@ -34,20 +34,17 @@ public class CompanyService : ICompanyService
         }
         catch (ArgumentNullException ex)
         {
-            var customEx = new DatabaseException("ArgumentNullException occurred while getting all companies.", ex);
-            _logger.Error(customEx, customEx.Message);
+            _logger.Error(new DatabaseException("ArgumentNullException occurred while getting all companies.", ex), "ArgumentNullException occurred while getting all companies.");
             result = Enumerable.Empty<CompanyInfo>();
         }
         catch (InvalidOperationException ex)
         {
-            var customEx = new DatabaseException("InvalidOperationException occurred while getting all companies.", ex);
-            _logger.Error(customEx, customEx.Message);
+            _logger.Error(new DatabaseException("InvalidOperationException occurred while getting all companies.", ex), "InvalidOperationException occurred while getting all companies.");
             result = Enumerable.Empty<CompanyInfo>();
         }
         catch (CompanyServiceException ex)
         {
-            var customEx = new DatabaseException("Error occurred while getting all companies.", ex);
-            _logger.Error(customEx, customEx.Message);
+            _logger.Error(new DatabaseException("Error occurred while getting all companies.", ex), "Error occurred while getting all companies.");
             result = Enumerable.Empty<CompanyInfo>();
         }
 
@@ -72,18 +69,15 @@ public class CompanyService : ICompanyService
         }
         catch (ArgumentNullException ex)
         {
-            var customEx = new DatabaseException("ArgumentNullException occurred while getting company by code.", ex);
-            _logger.Error(customEx, customEx.Message);
+            _logger.Error(new DatabaseException("ArgumentNullException occurred while getting company by code.", ex), "ArgumentNullException occurred while getting company by code.");
         }
         catch (InvalidOperationException ex)
         {
-            var customEx = new DatabaseException("InvalidOperationException occurred while getting company by code.", ex);
-            _logger.Error(customEx, customEx.Message);
+            _logger.Error(new DatabaseException("InvalidOperationException occurred while getting company by code.", ex), "InvalidOperationException occurred while getting company by code.");
         }
         catch (CompanyServiceException ex)
         {
-            var customEx = new DatabaseException($"Error occurred while getting company by code: {companyCode}", ex);
-            _logger.Error(customEx, customEx.Message);
+            _logger.Error(new DatabaseException($"Error occurred while getting company by code: {companyCode}", ex), $"Error occurred while getting company by code: {companyCode}");
         }
 
         return companyInfo;
@@ -101,20 +95,17 @@ public class CompanyService : ICompanyService
         }
         catch (ArgumentNullException ex)
         {
-            var customEx = new DatabaseException("ArgumentNullException occurred while adding a company.", ex);
-            _logger.Error(customEx, customEx.Message);
+            _logger.Error(new DatabaseException("ArgumentNullException occurred while adding a company.", ex), "ArgumentNullException occurred while adding a company.");
             result = new SaveResult(false, "Invalid input provided.");
         }
         catch (InvalidOperationException ex)
         {
-            var customEx = new DatabaseException("InvalidOperationException occurred while adding a company.", ex);
-            _logger.Error(customEx, customEx.Message);
+            _logger.Error(new DatabaseException("InvalidOperationException occurred while adding a company.", ex), "InvalidOperationException occurred while adding a company.");
             result = new SaveResult(false, "Operation could not be completed.");
         }
         catch (CompanyServiceException ex)
         {
-            var customEx = new DatabaseException("Error occurred while adding a company.", ex);
-            _logger.Error(customEx, customEx.Message);
+            _logger.Error(new DatabaseException("Error occurred while adding a company.", ex), "Error occurred while adding a company.");
             result = new SaveResult(false, "An error occurred while adding the company.");
         }
 
@@ -137,20 +128,17 @@ public class CompanyService : ICompanyService
         }
         catch (ArgumentNullException ex)
         {
-            var customEx = new DatabaseException("ArgumentNullException occurred while updating the company.", ex);
-            _logger.Error(customEx, customEx.Message);
+            _logger.Error(new DatabaseException("ArgumentNullException occurred while updating the company.", ex), "ArgumentNullException occurred while updating the company.");
             result = new SaveResult(false, "Invalid input provided.");
         }
         catch (InvalidOperationException ex)
         {
-            var customEx = new DatabaseException("InvalidOperationException occurred while updating the company.", ex);
-            _logger.Error(customEx, customEx.Message);
+            _logger.Error(new DatabaseException("InvalidOperationException occurred while updating the company.", ex), "InvalidOperationException occurred while updating the company.");
             result = new SaveResult(false, "Operation could not be completed.");
         }
         catch (CompanyServiceException ex)
         {
-            var customEx = new DatabaseException("Error occurred while updating the company.", ex);
-            _logger.Error(customEx, customEx.Message);
+            _logger.Error(new DatabaseException("Error occurred while updating the company.", ex), "Error occurred while updating the company.");
             result = new SaveResult(false, "An error occurred while updating the company.");
         }
 
@@ -171,20 +159,17 @@ public class CompanyService : ICompanyService
         }
         catch (ArgumentNullException ex)
         {
-            var customEx = new DatabaseException("ArgumentNullException occurred while deleting company by code.", ex);
-            _logger.Error(customEx, customEx.Message);
+            _logger.Error(new DatabaseException("ArgumentNullException occurred while deleting company by code.", ex), "ArgumentNullException occurred while deleting company by code.");
             result = false;
         }
         catch (InvalidOperationException ex)
         {
-            var customEx = new DatabaseException("InvalidOperationException occurred while deleting company by code.", ex);
-            _logger.Error(customEx, customEx.Message);
+            _logger.Error(new DatabaseException("InvalidOperationException occurred while deleting company by code.", ex), "InvalidOperationException occurred while deleting company by code.");
             result = false;
         }
         catch (CompanyServiceException ex)
         {
-            var customEx = new DatabaseException($"Error occurred while deleting company by code: {companyCode}", ex);
-            _logger.Error(customEx, customEx.Message);
+            _logger.Error(new DatabaseException($"Error occurred while deleting company by code: {companyCode}", ex), $"Error occurred while deleting company by code: {companyCode}");
             result = false;
         }
 

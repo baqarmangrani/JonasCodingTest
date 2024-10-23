@@ -42,18 +42,15 @@ public class EmployeeService : IEmployeeService
         }
         catch (ArgumentNullException ex)
         {
-            var customEx = new DatabaseException("ArgumentNullException occurred while getting all employees.", ex);
-            _logger.Error(customEx, customEx.Message);
+            _logger.Error(new DatabaseException("ArgumentNullException occurred while getting all employees.", ex), ex.Message);
         }
         catch (InvalidOperationException ex)
         {
-            var customEx = new DatabaseException("InvalidOperationException occurred while getting all employees.", ex);
-            _logger.Error(customEx, customEx.Message);
+            _logger.Error(new DatabaseException("InvalidOperationException occurred while getting all employees.", ex), ex.Message);
         }
         catch (EmployeeServiceException ex)
         {
-            var customEx = new DatabaseException("Error occurred while getting all employees.", ex);
-            _logger.Error(customEx, customEx.Message);
+            _logger.Error(new DatabaseException("Error occurred while getting all employees.", ex), ex.Message);
         }
 
         return employeeInfos;
@@ -79,18 +76,15 @@ public class EmployeeService : IEmployeeService
         }
         catch (ArgumentNullException ex)
         {
-            var customEx = new DatabaseException("ArgumentNullException occurred while getting employee by code.", ex);
-            _logger.Error(customEx, customEx.Message);
+            _logger.Error(new DatabaseException("ArgumentNullException occurred while getting employee by code.", ex), ex.Message);
         }
         catch (InvalidOperationException ex)
         {
-            var customEx = new DatabaseException("InvalidOperationException occurred while getting employee by code.", ex);
-            _logger.Error(customEx, customEx.Message);
+            _logger.Error(new DatabaseException("InvalidOperationException occurred while getting employee by code.", ex), ex.Message);
         }
         catch (EmployeeServiceException ex)
         {
-            var customEx = new DatabaseException($"Error occurred while getting employee by code: {employeeCode}", ex);
-            _logger.Error(customEx, customEx.Message);
+            _logger.Error(new DatabaseException($"Error occurred while getting employee by code: {employeeCode}", ex), ex.Message);
         }
 
         return employeeInfo;
@@ -122,20 +116,17 @@ public class EmployeeService : IEmployeeService
         }
         catch (ArgumentNullException ex)
         {
-            var customEx = new DatabaseException("ArgumentNullException occurred while adding an employee.", ex);
-            _logger.Error(customEx, customEx.Message);
+            _logger.Error(new DatabaseException("ArgumentNullException occurred while adding an employee.", ex), ex.Message);
             saveResult = new SaveResult(false, "Invalid input provided.");
         }
         catch (InvalidOperationException ex)
         {
-            var customEx = new DatabaseException("InvalidOperationException occurred while adding an employee.", ex);
-            _logger.Error(customEx, customEx.Message);
+            _logger.Error(new DatabaseException("InvalidOperationException occurred while adding an employee.", ex), ex.Message);
             saveResult = new SaveResult(false, "Operation could not be completed.");
         }
         catch (EmployeeServiceException ex)
         {
-            var customEx = new DatabaseException("Error occurred while adding an employee.", ex);
-            _logger.Error(customEx, customEx.Message);
+            _logger.Error(new DatabaseException("Error occurred while adding an employee.", ex), ex.Message);
         }
 
         return saveResult;
@@ -172,20 +163,17 @@ public class EmployeeService : IEmployeeService
         }
         catch (ArgumentNullException ex)
         {
-            var customEx = new DatabaseException("ArgumentNullException occurred while updating the employee.", ex);
-            _logger.Error(customEx, customEx.Message);
+            _logger.Error(new DatabaseException("ArgumentNullException occurred while updating the employee.", ex), ex.Message);
             saveResult = new SaveResult(false, "Invalid input provided.");
         }
         catch (InvalidOperationException ex)
         {
-            var customEx = new DatabaseException("InvalidOperationException occurred while updating the employee.", ex);
-            _logger.Error(customEx, customEx.Message);
+            _logger.Error(new DatabaseException("InvalidOperationException occurred while updating the employee.", ex), ex.Message);
             saveResult = new SaveResult(false, "Operation could not be completed.");
         }
         catch (EmployeeServiceException ex)
         {
-            var customEx = new DatabaseException("Error occurred while updating the employee.", ex);
-            _logger.Error(customEx, customEx.Message);
+            _logger.Error(new DatabaseException("Error occurred while updating the employee.", ex), ex.Message);
         }
 
         return saveResult;
@@ -204,18 +192,15 @@ public class EmployeeService : IEmployeeService
         }
         catch (ArgumentNullException ex)
         {
-            var customEx = new DatabaseException("ArgumentNullException occurred while deleting employee by code.", ex);
-            _logger.Error(customEx, customEx.Message);
+            _logger.Error(new DatabaseException("ArgumentNullException occurred while deleting employee by code.", ex), ex.Message);
         }
         catch (InvalidOperationException ex)
         {
-            var customEx = new DatabaseException("InvalidOperationException occurred while deleting employee by code.", ex);
-            _logger.Error(customEx, customEx.Message);
+            _logger.Error(new DatabaseException("InvalidOperationException occurred while deleting employee by code.", ex), ex.Message);
         }
         catch (EmployeeServiceException ex)
         {
-            var customEx = new DatabaseException($"Error occurred while deleting employee by code: {employeeCode}", ex);
-            _logger.Error(customEx, customEx.Message);
+            _logger.Error(new DatabaseException($"Error occurred while deleting employee by code: {employeeCode}", ex), ex.Message);
         }
 
         return result;
