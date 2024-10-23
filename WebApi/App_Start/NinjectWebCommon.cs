@@ -3,6 +3,7 @@ using BusinessLayer;
 using DataAccessLayer.Database;
 using DataAccessLayer.Model.Interfaces;
 using DataAccessLayer.Repositories;
+using Serilog;
 
 [assembly: WebActivatorEx.PreApplicationStartMethod(typeof(WebApi.App_Start.NinjectWebCommon), "Start")]
 [assembly: WebActivatorEx.ApplicationShutdownMethodAttribute(typeof(WebApi.App_Start.NinjectWebCommon), "Stop")]
@@ -71,6 +72,15 @@ namespace WebApi.App_Start
         /// <param name="kernel">The kernel.</param>
         private static void RegisterServices(IKernel kernel)
         {
+            // Configure Serilog
+            Log.Logger = new LoggerConfiguration()
+                .WriteTo.Console()
+                .WriteTo.File("logs/log-.txt", rollingInterval: RollingInterval.Day)
+                .CreateLogger();
+
+            // Register Serilog with Ninject
+            kernel.Bind<ILogger>().ToMethod(context => Log.Logger).InSingletonScope();
+
             kernel.Bind<IMapper>().ToMethod(context =>
             {
                 var config = new MapperConfiguration(cfg =>
