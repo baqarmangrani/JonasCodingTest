@@ -1,5 +1,4 @@
-﻿
-using DataAccessLayer.Model.Interfaces;
+﻿using DataAccessLayer.Model.Interfaces;
 using DataAccessLayer.Model.Models;
 using Serilog;
 using System;
@@ -57,8 +56,24 @@ namespace DataAccessLayer.Repositories
                     return new ResultData { IsSuccess = false, Message = "Company not found with the provided code." };
                 }
 
+                if (AreCompaniesEqual(existingCompany, company))
+                {
+                    return new ResultData { IsSuccess = true, Message = "No changes detected. Company is already up to date." };
+                }
+
                 UpdateCompanyDetails(existingCompany, company);
+
+                _logger.Information("Updating company with code {CompanyCode}. Existing company: {@ExistingCompany}, New company: {@NewCompany}", companyCode, existingCompany, company);
+
                 var updateResult = await RetryAsync(() => _companyDbWrapper.UpdateAsync(existingCompany));
+
+                _logger.Information("Update result for company with code {CompanyCode}: {UpdateResult}", companyCode, updateResult);
+
+                if (!updateResult)
+                {
+                    _logger.Error("UpdateAsync returned false for company with code {CompanyCode}.", companyCode);
+                }
+
                 return new ResultData { IsSuccess = updateResult, Message = updateResult ? "Company updated successfully." : "Failed to update company." };
             }, $"Error occurred while updating company by code: {companyCode}");
         }
@@ -142,7 +157,20 @@ namespace DataAccessLayer.Repositories
             existingCompany.FaxNumber = newCompany.FaxNumber;
             existingCompany.PhoneNumber = newCompany.PhoneNumber;
             existingCompany.PostalZipCode = newCompany.PostalZipCode;
-            existingCompany.LastModified = newCompany.LastModified;
+            existingCompany.LastModified = DateTime.UtcNow;
+        }
+
+        private bool AreCompaniesEqual(Company existingCompany, Company newCompany)
+        {
+            return existingCompany.CompanyName == newCompany.CompanyName &&
+                   existingCompany.AddressLine1 == newCompany.AddressLine1 &&
+                   existingCompany.AddressLine2 == newCompany.AddressLine2 &&
+                   existingCompany.AddressLine3 == newCompany.AddressLine3 &&
+                   existingCompany.Country == newCompany.Country &&
+                   existingCompany.EquipmentCompanyCode == newCompany.EquipmentCompanyCode &&
+                   existingCompany.FaxNumber == newCompany.FaxNumber &&
+                   existingCompany.PhoneNumber == newCompany.PhoneNumber &&
+                   existingCompany.PostalZipCode == newCompany.PostalZipCode;
         }
     }
 }
