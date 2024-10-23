@@ -54,12 +54,12 @@ namespace WebApi.Controllers
 
             var companyInfo = _mapper.Map<CompanyInfo>(companyDto);
             var result = await _companyService.AddCompanyAsync(companyInfo);
-            if (!result)
+
+            if (!result.Success)
             {
-                return InternalServerError();
+                return Content(HttpStatusCode.Conflict, result.Message);
             }
 
-            // Use the named route "GetCompanyByCode"
             return CreatedAtRoute("GetCompanyByCode", new { companyCode = companyInfo.CompanyCode }, companyDto);
         }
 

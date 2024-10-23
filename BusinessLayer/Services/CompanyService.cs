@@ -31,10 +31,17 @@ namespace BusinessLayer.Services
             return _mapper.Map<CompanyInfo>(result);
         }
 
-        public async Task<bool> AddCompanyAsync(CompanyInfo companyInfo)
+        public async Task<SaveCompanyResult> AddCompanyAsync(CompanyInfo companyInfo)
         {
             var company = _mapper.Map<Company>(companyInfo);
-            return await _companyRepository.SaveCompanyAsync(company);
+
+            var resultData = await _companyRepository.SaveCompanyAsync(company);
+
+            return new SaveCompanyResult
+            {
+                Success = resultData.Success,
+                Message = resultData.Message
+            };
         }
 
         public async Task<bool> UpdateCompanyByCodeAsync(string companyCode, CompanyInfo companyInfo)

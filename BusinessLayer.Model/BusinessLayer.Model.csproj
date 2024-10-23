@@ -45,6 +45,7 @@
     <Compile Include="Models\ArSubledgerInfo.cs" />
     <Compile Include="Models\BaseInfo.cs" />
     <Compile Include="Models\CompanyInfo.cs" />
+    <Compile Include="Models\SaveCompanyResult.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup />

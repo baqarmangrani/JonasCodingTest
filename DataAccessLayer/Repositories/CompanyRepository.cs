@@ -26,26 +26,26 @@ namespace DataAccessLayer.Repositories
             return companies?.FirstOrDefault();
         }
 
-        public async Task<bool> SaveCompanyAsync(Company company)
+        public async Task<SaveCompanyResultData> SaveCompanyAsync(Company company)
         {
             var itemRepo = (await _companyDbWrapper.FindAsync(t =>
                 t.SiteId.Equals(company.SiteId) && t.CompanyCode.Equals(company.CompanyCode)))?.FirstOrDefault();
             if (itemRepo != null)
             {
-                itemRepo.CompanyName = company.CompanyName;
-                itemRepo.AddressLine1 = company.AddressLine1;
-                itemRepo.AddressLine2 = company.AddressLine2;
-                itemRepo.AddressLine3 = company.AddressLine3;
-                itemRepo.Country = company.Country;
-                itemRepo.EquipmentCompanyCode = company.EquipmentCompanyCode;
-                itemRepo.FaxNumber = company.FaxNumber;
-                itemRepo.PhoneNumber = company.PhoneNumber;
-                itemRepo.PostalZipCode = company.PostalZipCode;
-                itemRepo.LastModified = company.LastModified;
-                return await _companyDbWrapper.UpdateAsync(itemRepo);
+                return new SaveCompanyResultData
+                {
+                    Success = false,
+                    Message = "Company already exists with the same code."
+                };
             }
 
-            return await _companyDbWrapper.InsertAsync(company);
+            var insertResult = await _companyDbWrapper.InsertAsync(company);
+
+            return new SaveCompanyResultData
+            {
+                Success = insertResult,
+                Message = insertResult ? "Company saved successfully." : "Failed to save company."
+            };
         }
 
         public async Task<bool> UpdateByCodeAsync(string companyCode, Company company)
