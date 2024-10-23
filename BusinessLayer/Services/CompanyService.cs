@@ -1,5 +1,4 @@
 ﻿using AutoMapper;
-using BusinessLayer.Exceptions;
 using BusinessLayer.Model.Interfaces;
 using BusinessLayer.Model.Models;
 using DataAccessLayer.Model.Interfaces;
@@ -7,161 +6,159 @@ using DataAccessLayer.Model.Models;
 using Serilog;
 using System;
 using System.Collections.Generic;
-using System.Data.SqlClient;
+using System.Linq;
 using System.Threading.Tasks;
 
-namespace BusinessLayer.Services
+public class CompanyService : ICompanyService
 {
-    public class CompanyService : ICompanyService
+    private readonly ICompanyRepository _companyRepository;
+    private readonly IMapper _mapper;
+    private readonly ILogger _logger;
+
+    public CompanyService(ICompanyRepository companyRepository, IMapper mapper, ILogger logger)
     {
-        private readonly ICompanyRepository _companyRepository;
-        private readonly IMapper _mapper;
-        private readonly ILogger _logger;
+        _companyRepository = companyRepository;
+        _mapper = mapper;
+        _logger = logger;
+    }
 
-        public CompanyService(ICompanyRepository companyRepository, IMapper mapper, ILogger logger)
+    public async Task<IEnumerable<CompanyInfo>> GetAllCompaniesAsync()
+    {
+        try
         {
-            _companyRepository = companyRepository;
-            _mapper = mapper;
-            _logger = logger;
+            var companies = await _companyRepository.GetAllAsync();
+            return _mapper.Map<IEnumerable<CompanyInfo>>(companies);
         }
-
-        public async Task<IEnumerable<CompanyInfo>> GetAllCompaniesAsync()
+        catch (ArgumentNullException ex)
         {
-            try
-            {
-                var res = await _companyRepository.GetAllAsync();
-                return _mapper.Map<IEnumerable<CompanyInfo>>(res);
-            }
-            catch (SqlException ex)
-            {
-                _logger.Error(ex, "Database error occurred while getting all companies.");
-                throw new DatabaseException(DatabaseException.DefaultMessage, ex);
-            }
-            catch (Exception ex)
-            {
-                _logger.Error(ex, "Error occurred while getting all companies.");
-                throw new CompanyServiceException(CompanyServiceException.DefaultMessage, ex);
-            }
+            _logger.Error(ex, "ArgumentNullException occurred while getting all companies.");
+            return Enumerable.Empty<CompanyInfo>();
         }
-
-        public async Task<CompanyInfo> GetCompanyByCodeAsync(string companyCode)
+        catch (InvalidOperationException ex)
         {
-            try
-            {
-                var result = await _companyRepository.GetByCodeAsync(companyCode);
-                if (result == null)
-                {
-                    throw new NotFoundException($"Company with code {companyCode} not found.");
-                }
-                return _mapper.Map<CompanyInfo>(result);
-            }
-            catch (NotFoundException ex)
-            {
-                _logger.Warning(ex, $"Company with code {companyCode} not found.");
-                throw;
-            }
-            catch (SqlException ex)
-            {
-                _logger.Error(ex, $"Database error occurred while getting company by code: {companyCode}");
-                throw new DatabaseException(DatabaseException.DefaultMessage, ex);
-            }
-            catch (Exception ex)
-            {
-                _logger.Error(ex, $"Error occurred while getting company by code: {companyCode}");
-                throw new CompanyServiceException(CompanyServiceException.DefaultMessage, ex);
-            }
+            _logger.Error(ex, "InvalidOperationException occurred while getting all companies.");
+            return Enumerable.Empty<CompanyInfo>();
         }
-
-        public async Task<SaveResult> AddCompanyAsync(CompanyInfo companyInfo)
+        catch (Exception ex)
         {
-            try
-            {
-                var company = _mapper.Map<Company>(companyInfo);
-                var resultData = await _companyRepository.SaveCompanyAsync(company);
-
-                if (!resultData.Success)
-                {
-                    throw new ConflictException(resultData.Message ?? ConflictException.DefaultMessage);
-                }
-
-                return new SaveResult(resultData.Success, resultData.Message);
-            }
-            catch (ConflictException ex)
-            {
-                _logger.Warning(ex, "Conflict occurred while adding a new company.");
-                throw;
-            }
-            catch (SqlException ex)
-            {
-                _logger.Error(ex, "Database error occurred while adding a new company.");
-                throw new DatabaseException(DatabaseException.DefaultMessage, ex);
-            }
-            catch (Exception ex)
-            {
-                _logger.Error(ex, "Error occurred while adding a new company.");
-                throw new CompanyServiceException(CompanyServiceException.DefaultMessage, ex);
-            }
+            _logger.Error(ex, "Error occurred while getting all companies.");
+            return Enumerable.Empty<CompanyInfo>();
         }
+    }
 
-        public async Task<SaveResult> UpdateCompanyByCodeAsync(string companyCode, CompanyInfo companyInfo)
+    public async Task<CompanyInfo> GetCompanyByCodeAsync(string companyCode)
+    {
+        try
         {
-            try
+            var company = await _companyRepository.GetByCodeAsync(companyCode);
+            if (company == null)
             {
-                var company = _mapper.Map<Company>(companyInfo);
-                var result = await _companyRepository.UpdateByCodeAsync(companyCode, company);
+                _logger.Warning($"Company with code {companyCode} not found.");
+                return null;
+            }
 
-                if (!result)
-                {
-                    return new SaveResult(false, $"Company with code {companyCode} not found.");
-                }
-
-                return new SaveResult(true, "Company updated successfully.");
-            }
-            catch (NotFoundException ex)
-            {
-                _logger.Warning(ex, $"Company with code {companyCode} not found.");
-                throw;
-            }
-            catch (SqlException ex)
-            {
-                _logger.Error(ex, $"Database error occurred while updating company by code: {companyCode}");
-                throw new DatabaseException(DatabaseException.DefaultMessage, ex);
-            }
-            catch (Exception ex)
-            {
-                _logger.Error(ex, $"Error occurred while updating company by code: {companyCode}");
-                throw new CompanyServiceException(CompanyServiceException.DefaultMessage, ex);
-            }
+            return _mapper.Map<CompanyInfo>(company);
         }
-
-        public async Task<bool> DeleteCompanyByCodeAsync(string companyCode)
+        catch (ArgumentNullException ex)
         {
-            try
-            {
-                var result = await _companyRepository.DeleteByCodeAsync(companyCode);
+            _logger.Error(ex, "ArgumentNullException occurred while getting company by code.");
+            return null;
+        }
+        catch (InvalidOperationException ex)
+        {
+            _logger.Error(ex, "InvalidOperationException occurred while getting company by code.");
+            return null;
+        }
+        catch (Exception ex)
+        {
+            _logger.Error(ex, $"Error occurred while getting company by code: {companyCode}");
+            return null;
+        }
+    }
 
-                if (!result)
-                {
-                    throw new NotFoundException($"Company with code {companyCode} not found.");
-                }
+    public async Task<SaveResult> AddCompanyAsync(CompanyInfo companyInfo)
+    {
+        try
+        {
+            var company = _mapper.Map<Company>(companyInfo);
+            var result = await _companyRepository.SaveCompanyAsync(company);
 
-                return result;
-            }
-            catch (NotFoundException ex)
+            return new SaveResult(result.Success, result.Message);
+        }
+        catch (ArgumentNullException ex)
+        {
+            _logger.Error(ex, "ArgumentNullException occurred while adding a company.");
+            return new SaveResult(false, "Invalid input provided.");
+        }
+        catch (InvalidOperationException ex)
+        {
+            _logger.Error(ex, "InvalidOperationException occurred while adding a company.");
+            return new SaveResult(false, "Operation could not be completed.");
+        }
+        catch (Exception ex)
+        {
+            _logger.Error(ex, "Error occurred while adding a company.");
+            return new SaveResult(false, "An error occurred while adding the company.");
+        }
+    }
+
+    public async Task<SaveResult> UpdateCompanyByCodeAsync(string companyCode, CompanyInfo companyInfo)
+    {
+        try
+        {
+            var company = _mapper.Map<Company>(companyInfo);
+            var result = await _companyRepository.UpdateByCodeAsync(companyCode, company);
+
+            if (!result)
             {
-                _logger.Warning(ex, $"Company with code {companyCode} not found.");
-                throw;
+                _logger.Warning($"Company with code {companyCode} not found.");
             }
-            catch (SqlException ex)
+
+            return new SaveResult(result, result ? "Company updated successfully." : "Failed to update company.");
+        }
+        catch (ArgumentNullException ex)
+        {
+            _logger.Error(ex, "ArgumentNullException occurred while updating the company.");
+            return new SaveResult(false, "Invalid input provided.");
+        }
+        catch (InvalidOperationException ex)
+        {
+            _logger.Error(ex, "InvalidOperationException occurred while updating the company.");
+            return new SaveResult(false, "Operation could not be completed.");
+        }
+        catch (Exception ex)
+        {
+            _logger.Error(ex, "Error occurred while updating the company.");
+            return new SaveResult(false, "An error occurred while updating the company.");
+        }
+    }
+
+    public async Task<bool> DeleteCompanyByCodeAsync(string companyCode)
+    {
+        try
+        {
+            var result = await _companyRepository.DeleteByCodeAsync(companyCode);
+            if (!result)
             {
-                _logger.Error(ex, $"Database error occurred while deleting company by code: {companyCode}");
-                throw new DatabaseException(DatabaseException.DefaultMessage, ex);
+                _logger.Warning($"Company with code {companyCode} not found.");
             }
-            catch (Exception ex)
-            {
-                _logger.Error(ex, $"Error occurred while deleting company by code: {companyCode}");
-                throw new CompanyServiceException(CompanyServiceException.DefaultMessage, ex);
-            }
+
+            return result;
+        }
+        catch (ArgumentNullException ex)
+        {
+            _logger.Error(ex, "ArgumentNullException occurred while deleting company by code.");
+            return false;
+        }
+        catch (InvalidOperationException ex)
+        {
+            _logger.Error(ex, "InvalidOperationException occurred while deleting company by code.");
+            return false;
+        }
+        catch (Exception ex)
+        {
+            _logger.Error(ex, $"Error occurred while deleting company by code: {companyCode}");
+            return false;
         }
     }
 }

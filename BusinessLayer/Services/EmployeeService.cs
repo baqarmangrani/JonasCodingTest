@@ -39,6 +39,16 @@ public class EmployeeService : IEmployeeService
 
             return employeeInfos;
         }
+        catch (ArgumentNullException ex)
+        {
+            _logger.Error(ex, "ArgumentNullException occurred while getting all employees.");
+            return Enumerable.Empty<EmployeeInfo>();
+        }
+        catch (InvalidOperationException ex)
+        {
+            _logger.Error(ex, "InvalidOperationException occurred while getting all employees.");
+            return Enumerable.Empty<EmployeeInfo>();
+        }
         catch (Exception ex)
         {
             _logger.Error(ex, "Error occurred while getting all employees.");
@@ -48,26 +58,36 @@ public class EmployeeService : IEmployeeService
 
     public async Task<EmployeeInfo> GetEmployeeByCodeAsync(string employeeCode)
     {
+        EmployeeInfo employeeInfo = null;
+
         try
         {
             var employee = await _employeeRepository.GetByCodeAsync(employeeCode);
             if (employee == null)
             {
                 _logger.Warning($"Employee with code {employeeCode} not found.");
-                return null;
             }
-
-            var employeeInfo = _mapper.Map<EmployeeInfo>(employee);
-            var company = await _companyRepository.GetByCodeAsync(employee.CompanyCode);
-            employeeInfo.CompanyName = company?.CompanyName;
-
-            return employeeInfo;
+            else
+            {
+                employeeInfo = _mapper.Map<EmployeeInfo>(employee);
+                var company = await _companyRepository.GetByCodeAsync(employee.CompanyCode);
+                employeeInfo.CompanyName = company?.CompanyName;
+            }
+        }
+        catch (ArgumentNullException ex)
+        {
+            _logger.Error(ex, "ArgumentNullException occurred while getting employee by code.");
+        }
+        catch (InvalidOperationException ex)
+        {
+            _logger.Error(ex, "InvalidOperationException occurred while getting employee by code.");
         }
         catch (Exception ex)
         {
             _logger.Error(ex, $"Error occurred while getting employee by code: {employeeCode}");
-            return null;
         }
+
+        return employeeInfo;
     }
 
     public async Task<SaveResult> AddEmployeeAsync(EmployeeInfo employeeInfo)
@@ -89,6 +109,16 @@ public class EmployeeService : IEmployeeService
             var result = await _employeeRepository.SaveEmployeeAsync(employee);
 
             return new SaveResult(result.Success, result.Message);
+        }
+        catch (ArgumentNullException ex)
+        {
+            _logger.Error(ex, "ArgumentNullException occurred while adding an employee.");
+            return new SaveResult(false, "Invalid input provided.");
+        }
+        catch (InvalidOperationException ex)
+        {
+            _logger.Error(ex, "InvalidOperationException occurred while adding an employee.");
+            return new SaveResult(false, "Operation could not be completed.");
         }
         catch (Exception ex)
         {
@@ -122,6 +152,16 @@ public class EmployeeService : IEmployeeService
 
             return new SaveResult(result.Success, result.Message);
         }
+        catch (ArgumentNullException ex)
+        {
+            _logger.Error(ex, "ArgumentNullException occurred while updating the employee.");
+            return new SaveResult(false, "Invalid input provided.");
+        }
+        catch (InvalidOperationException ex)
+        {
+            _logger.Error(ex, "InvalidOperationException occurred while updating the employee.");
+            return new SaveResult(false, "Operation could not be completed.");
+        }
         catch (Exception ex)
         {
             _logger.Error(ex, "Error occurred while updating the employee.");
@@ -140,6 +180,16 @@ public class EmployeeService : IEmployeeService
             }
 
             return result;
+        }
+        catch (ArgumentNullException ex)
+        {
+            _logger.Error(ex, "ArgumentNullException occurred while deleting employee by code.");
+            return false;
+        }
+        catch (InvalidOperationException ex)
+        {
+            _logger.Error(ex, "InvalidOperationException occurred while deleting employee by code.");
+            return false;
         }
         catch (Exception ex)
         {

@@ -10,7 +10,6 @@ using Serilog;
 namespace WebApi.App_Start
 {
     using BusinessLayer.Model.Interfaces;
-    using BusinessLayer.Services;
     using Microsoft.Web.Infrastructure.DynamicModuleHelper;
     using Ninject;
     using Ninject.Web.Common;
