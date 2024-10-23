@@ -9,19 +9,19 @@ using WebApi.Models;
 
 namespace WebApi.Controllers
 {
-    [RoutePrefix("api/company")]
-    public class CompanyController : ApiController
+    [RoutePrefix("api/companies")]
+    public class CompaniesController : ApiController
     {
         private readonly ICompanyService _companyService;
         private readonly IMapper _mapper;
 
-        public CompanyController(ICompanyService companyService, IMapper mapper)
+        public CompaniesController(ICompanyService companyService, IMapper mapper)
         {
             _companyService = companyService;
             _mapper = mapper;
         }
 
-        // GET api/company
+        // GET api/companies
         [HttpGet]
         public async Task<IHttpActionResult> GetAll()
         {
@@ -30,7 +30,7 @@ namespace WebApi.Controllers
             return Ok(companyDtos);
         }
 
-        // GET api/company/{companyCode}
+        // GET api/companies/{companyCode}
         [HttpGet, Route("{companyCode}", Name = "GetCompanyByCode")]
         public async Task<IHttpActionResult> Get(string companyCode)
         {
@@ -43,7 +43,7 @@ namespace WebApi.Controllers
             return Ok(companyDto);
         }
 
-        // POST api/company
+        // POST api/companies
         [HttpPost]
         public async Task<IHttpActionResult> Post([FromBody] CompanyDto companyDto)
         {
@@ -63,7 +63,7 @@ namespace WebApi.Controllers
             return CreatedAtRoute("GetCompanyByCode", new { companyCode = companyInfo.CompanyCode }, companyDto);
         }
 
-        // PUT api/company/{companyCode}
+        // PUT api/companies/{companyCode}
         [HttpPut, Route("{companyCode}")]
         public async Task<IHttpActionResult> Put(string companyCode, [FromBody] CompanyDto companyDto)
         {
@@ -81,7 +81,7 @@ namespace WebApi.Controllers
             return StatusCode(HttpStatusCode.NoContent);
         }
 
-        // DELETE api/company/{companyCode}
+        // DELETE api/companies/{companyCode}
         [HttpDelete, Route("{companyCode}")]
         public async Task<IHttpActionResult> Delete(string companyCode)
         {

@@ -9,19 +9,19 @@ using WebApi.Models;
 
 namespace WebApi.Controllers
 {
-    [RoutePrefix("api/employee")]
-    public class EmployeeController : ApiController
+    [RoutePrefix("api/employeess")]
+    public class EmployeesController : ApiController
     {
         private readonly IEmployeeService _employeeService;
         private readonly IMapper _mapper;
 
-        public EmployeeController(IEmployeeService employeeService, IMapper mapper)
+        public EmployeesController(IEmployeeService employeeService, IMapper mapper)
         {
             _employeeService = employeeService;
             _mapper = mapper;
         }
 
-        // GET api/employee
+        // GET api/employees
         [HttpGet]
         public async Task<IHttpActionResult> GetAll()
         {
@@ -30,7 +30,7 @@ namespace WebApi.Controllers
             return Ok(employeeDtos);
         }
 
-        // GET api/employee/{employeeCode}
+        // GET api/employees/{employeeCode}
         [HttpGet, Route("{employeeCode}", Name = "GetEmployeeByCode")]
         public async Task<IHttpActionResult> Get(string employeeCode)
         {
@@ -43,7 +43,7 @@ namespace WebApi.Controllers
             return Ok(employeeDto);
         }
 
-        // POST api/employee
+        // POST api/employees
         [HttpPost]
         public async Task<IHttpActionResult> Post([FromBody] EmployeeDto employeeDto)
         {
@@ -63,7 +63,7 @@ namespace WebApi.Controllers
             return CreatedAtRoute("GetEmployeeByCode", new { employeeCode = employeeInfo.EmployeeCode }, employeeDto);
         }
 
-        // PUT api/employee/{employeeCode}
+        // PUT api/employees/{employeeCode}
         [HttpPut, Route("{employeeCode}")]
         public async Task<IHttpActionResult> Put(string employeeCode, [FromBody] EmployeeDto employeeDto)
         {
@@ -81,7 +81,7 @@ namespace WebApi.Controllers
             return StatusCode(HttpStatusCode.NoContent);
         }
 
-        // DELETE api/employee/{employeeCode}
+        // DELETE api/employees/{employeeCode}
         [HttpDelete, Route("{employeeCode}")]
         public async Task<IHttpActionResult> Delete(string employeeCode)
         {
