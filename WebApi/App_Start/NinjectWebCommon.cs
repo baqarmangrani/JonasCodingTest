@@ -18,6 +18,7 @@ namespace WebApi.App_Start
     using Ninject.Web.Common.WebHost;
     using Ninject.WebApi.DependencyResolver;
     using System;
+    using System.IO;
     using System.Web;
     using System.Web.Http;
 
@@ -72,13 +73,18 @@ namespace WebApi.App_Start
         /// <param name="kernel">The kernel.</param>
         private static void RegisterServices(IKernel kernel)
         {
-            // Configure Serilog
+            var logDirectory = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "logs");
+
+            if (!Directory.Exists(logDirectory))
+            {
+                Directory.CreateDirectory(logDirectory);
+            }
+
             Log.Logger = new LoggerConfiguration()
                 .WriteTo.Console()
-                .WriteTo.File("logs/log-.txt", rollingInterval: RollingInterval.Day)
+                .WriteTo.File(Path.Combine(logDirectory, "log-.txt"), rollingInterval: RollingInterval.Day)
                 .CreateLogger();
 
-            // Register Serilog with Ninject
             kernel.Bind<ILogger>().ToMethod(context => Log.Logger).InSingletonScope();
 
             kernel.Bind<IMapper>().ToMethod(context =>

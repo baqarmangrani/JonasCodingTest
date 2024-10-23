@@ -7,3 +7,4 @@
 /WebApi/Web.Release.config
 .vs/
 *.user
+/WebApi/logs
