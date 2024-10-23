@@ -26,13 +26,14 @@ namespace DataAccessLayer.Repositories
             return companies?.FirstOrDefault();
         }
 
-        public async Task<SaveCompanyResultData> SaveCompanyAsync(Company company)
+        public async Task<SaveResultData> SaveCompanyAsync(Company company)
         {
             var itemRepo = (await _companyDbWrapper.FindAsync(t =>
                 t.SiteId.Equals(company.SiteId) && t.CompanyCode.Equals(company.CompanyCode)))?.FirstOrDefault();
+
             if (itemRepo != null)
             {
-                return new SaveCompanyResultData
+                return new SaveResultData
                 {
                     Success = false,
                     Message = "Company already exists with the same code."
@@ -41,7 +42,7 @@ namespace DataAccessLayer.Repositories
 
             var insertResult = await _companyDbWrapper.InsertAsync(company);
 
-            return new SaveCompanyResultData
+            return new SaveResultData
             {
                 Success = insertResult,
                 Message = insertResult ? "Company saved successfully." : "Failed to save company."
