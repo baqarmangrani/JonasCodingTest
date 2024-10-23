@@ -1,6 +1,8 @@
-﻿namespace WebApi.Models
+﻿using System;
+
+namespace WebApi.Models
 {
-    public class EmployeeDto : BaseDto
+    public class EmployeeDto
     {
         public string EmployeeCode { get; set; }
         public string EmployeeName { get; set; }
@@ -9,6 +11,6 @@
         public string EmployeeStatus { get; set; }
         public string EmailAddress { get; set; }
         public string PhoneNumber { get; set; }
-        public string LastModifiedDateTime { get; set; }
+        public DateTime LastModifiedDateTime { get; set; }
     }
 }

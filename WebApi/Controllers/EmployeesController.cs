@@ -9,7 +9,7 @@ using WebApi.Models;
 
 namespace WebApi.Controllers
 {
-    [RoutePrefix("api/employeess")]
+    [RoutePrefix("api/employees")]
     public class EmployeesController : ApiController
     {
         private readonly IEmployeeService _employeeService;

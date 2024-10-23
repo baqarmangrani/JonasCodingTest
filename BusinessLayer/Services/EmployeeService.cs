@@ -4,6 +4,7 @@ using BusinessLayer.Model.Models;
 using DataAccessLayer.Model.Interfaces;
 using DataAccessLayer.Model.Models;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 public class EmployeeService : IEmployeeService
@@ -22,12 +23,12 @@ public class EmployeeService : IEmployeeService
     public async Task<IEnumerable<EmployeeInfo>> GetAllEmployeesAsync()
     {
         var employees = await _employeeRepository.GetAllAsync();
-        var employeeInfos = _mapper.Map<IEnumerable<EmployeeInfo>>(employees);
+        var employeeInfos = _mapper.Map<IEnumerable<EmployeeInfo>>(employees).ToList();
 
-        foreach (var employeeInfo in employeeInfos)
+        foreach (var employee in employees)
         {
-            var company = await _companyRepository.GetByCodeAsync(employeeInfo.CompanyCode);
-            employeeInfo.CompanyName = company?.CompanyName;
+            var company = await _companyRepository.GetByCodeAsync(employee.CompanyCode);
+            employeeInfos.First(e => e.EmployeeCode.Equals(employee.EmployeeCode)).CompanyName = company?.CompanyName;
         }
 
         return employeeInfos;
@@ -44,12 +45,28 @@ public class EmployeeService : IEmployeeService
         var employeeInfo = _mapper.Map<EmployeeInfo>(employee);
         var company = await _companyRepository.GetByCodeAsync(employee.CompanyCode);
         employeeInfo.CompanyName = company?.CompanyName;
+
         return employeeInfo;
     }
 
     public async Task<SaveResult> AddEmployeeAsync(EmployeeInfo employeeInfo)
     {
+        var company = await _companyRepository.GetByNameAsync(employeeInfo.CompanyName);
+
+        if (company == null)
+        {
+            return new SaveResult
+            {
+                Success = false,
+                Message = "Company of that Employeed is not found."
+            };
+        }
+
         var employee = _mapper.Map<Employee>(employeeInfo);
+
+        employee.CompanyCode = company.CompanyCode;
+        employee.SiteId = company.SiteId;
+
         var resultData = await _employeeRepository.SaveEmployeeAsync(employee);
 
         return new SaveResult
@@ -61,7 +78,18 @@ public class EmployeeService : IEmployeeService
 
     public async Task<bool> UpdateEmployeeByCodeAsync(string employeeCode, EmployeeInfo employeeInfo)
     {
+        var company = await _companyRepository.GetByNameAsync(employeeInfo.CompanyName);
+
+        if (company == null)
+        {
+            return false;
+        }
+
         var employee = _mapper.Map<Employee>(employeeInfo);
+
+        employee.CompanyCode = company.CompanyCode;
+        employee.SiteId = company.SiteId;
+
         return await _employeeRepository.UpdateByCodeAsync(employeeCode, employee);
     }
 

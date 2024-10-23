@@ -76,5 +76,11 @@ namespace DataAccessLayer.Repositories
         {
             return await _companyDbWrapper.DeleteAsync(t => t.CompanyCode.Equals(companyCode));
         }
+
+        public async Task<Company> GetByNameAsync(string companyName)
+        {
+            var companies = await _companyDbWrapper.FindAsync(t => t.CompanyName.Equals(companyName));
+            return companies?.FirstOrDefault();
+        }
     }
 }
