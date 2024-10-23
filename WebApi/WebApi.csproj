@@ -122,6 +122,7 @@
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
     <Compile Include="Models\ArSubledgerDto.cs" />
+    <Compile Include="Models\BaseDto.cs" />
     <Compile Include="Models\CompanyDto.cs" />
     <Compile Include="Models\EmployeeDto.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

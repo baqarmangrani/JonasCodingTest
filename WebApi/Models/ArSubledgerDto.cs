@@ -22,9 +22,4 @@ namespace WebApi.Models
         public string Poor { get; set; }
         public string Condemned { get; set; }
     }
-    public class BaseDto
-    {
-        public string SiteId { get; set; }
-        public string CompanyCode { get; set; }
-    }
 }
