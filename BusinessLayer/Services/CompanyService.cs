@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using BusinessLayer.Exceptions;
 using BusinessLayer.Model.Interfaces;
 using BusinessLayer.Model.Models;
 using DataAccessLayer.Model.Interfaces;
@@ -6,6 +7,7 @@ using DataAccessLayer.Model.Models;
 using Serilog;
 using System;
 using System.Collections.Generic;
+using System.Data.SqlClient;
 using System.Threading.Tasks;
 
 namespace BusinessLayer.Services
@@ -30,10 +32,15 @@ namespace BusinessLayer.Services
                 var res = await _companyRepository.GetAllAsync();
                 return _mapper.Map<IEnumerable<CompanyInfo>>(res);
             }
+            catch (SqlException ex)
+            {
+                _logger.Error(ex, "Database error occurred while getting all companies.");
+                throw new DatabaseException(DatabaseException.DefaultMessage, ex);
+            }
             catch (Exception ex)
             {
                 _logger.Error(ex, "Error occurred while getting all companies.");
-                throw;
+                throw new CustomException(CustomException.DefaultMessage, ex);
             }
         }
 
@@ -42,12 +49,26 @@ namespace BusinessLayer.Services
             try
             {
                 var result = await _companyRepository.GetByCodeAsync(companyCode);
+                if (result == null)
+                {
+                    throw new NotFoundException($"Company with code {companyCode} not found.");
+                }
                 return _mapper.Map<CompanyInfo>(result);
+            }
+            catch (NotFoundException ex)
+            {
+                _logger.Error(ex, $"Company with code {companyCode} not found.");
+                throw;
+            }
+            catch (SqlException ex)
+            {
+                _logger.Error(ex, $"Database error occurred while getting company by code: {companyCode}");
+                throw new DatabaseException(DatabaseException.DefaultMessage, ex);
             }
             catch (Exception ex)
             {
                 _logger.Error(ex, $"Error occurred while getting company by code: {companyCode}");
-                throw;
+                throw new CustomException(CustomException.DefaultMessage, ex);
             }
         }
 
@@ -58,16 +79,31 @@ namespace BusinessLayer.Services
                 var company = _mapper.Map<Company>(companyInfo);
                 var resultData = await _companyRepository.SaveCompanyAsync(company);
 
+                if (!resultData.Success)
+                {
+                    throw new ConflictException(ConflictException.DefaultMessage);
+                }
+
                 return new SaveResult
                 {
                     Success = resultData.Success,
                     Message = resultData.Message
                 };
             }
+            catch (ConflictException ex)
+            {
+                _logger.Error(ex, "Conflict occurred while adding a new company.");
+                throw;
+            }
+            catch (SqlException ex)
+            {
+                _logger.Error(ex, "Database error occurred while adding a new company.");
+                throw new DatabaseException(DatabaseException.DefaultMessage, ex);
+            }
             catch (Exception ex)
             {
                 _logger.Error(ex, "Error occurred while adding a new company.");
-                throw;
+                throw new CustomException(CustomException.DefaultMessage, ex);
             }
         }
 
@@ -76,12 +112,29 @@ namespace BusinessLayer.Services
             try
             {
                 var company = _mapper.Map<Company>(companyInfo);
-                return await _companyRepository.UpdateByCodeAsync(companyCode, company);
+                var result = await _companyRepository.UpdateByCodeAsync(companyCode, company);
+
+                if (!result)
+                {
+                    throw new NotFoundException($"Company with code {companyCode} not found.");
+                }
+
+                return result;
+            }
+            catch (NotFoundException ex)
+            {
+                _logger.Error(ex, $"Company with code {companyCode} not found.");
+                throw;
+            }
+            catch (SqlException ex)
+            {
+                _logger.Error(ex, $"Database error occurred while updating company by code: {companyCode}");
+                throw new DatabaseException(DatabaseException.DefaultMessage, ex);
             }
             catch (Exception ex)
             {
                 _logger.Error(ex, $"Error occurred while updating company by code: {companyCode}");
-                throw;
+                throw new CustomException(CustomException.DefaultMessage, ex);
             }
         }
 
@@ -89,12 +142,29 @@ namespace BusinessLayer.Services
         {
             try
             {
-                return await _companyRepository.DeleteByCodeAsync(companyCode);
+                var result = await _companyRepository.DeleteByCodeAsync(companyCode);
+
+                if (!result)
+                {
+                    throw new NotFoundException($"Company with code {companyCode} not found.");
+                }
+
+                return result;
+            }
+            catch (NotFoundException ex)
+            {
+                _logger.Error(ex, $"Company with code {companyCode} not found.");
+                throw;
+            }
+            catch (SqlException ex)
+            {
+                _logger.Error(ex, $"Database error occurred while deleting company by code: {companyCode}");
+                throw new DatabaseException(DatabaseException.DefaultMessage, ex);
             }
             catch (Exception ex)
             {
                 _logger.Error(ex, $"Error occurred while deleting company by code: {companyCode}");
-                throw;
+                throw new CustomException(CustomException.DefaultMessage, ex);
             }
         }
     }
