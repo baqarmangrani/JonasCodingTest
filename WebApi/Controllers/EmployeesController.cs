@@ -109,12 +109,13 @@ namespace WebApi.Controllers
             return await ExecuteAsync(async () =>
             {
                 var result = await _employeeService.DeleteEmployeeByCodeAsync(employeeCode);
-                if (!result)
+
+                if (!result.IsSuccess)
                 {
                     _logger.Warning($"Employee with code {employeeCode} not found for deletion.");
-                    return NotFound();
+                    return Content(HttpStatusCode.NotFound, result.Message);
                 }
-                return StatusCode(HttpStatusCode.NoContent);
+                return Ok(new { Message = result.Message });
             }, $"Error occurred while deleting employee with code {employeeCode}.");
         }
 

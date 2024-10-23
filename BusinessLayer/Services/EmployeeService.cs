@@ -135,21 +135,28 @@ public class EmployeeService : IEmployeeService
         }
     }
 
-    public async Task<bool> DeleteEmployeeByCodeAsync(string employeeCode)
+    public async Task<Result> DeleteEmployeeByCodeAsync(string employeeCode)
     {
+        if (string.IsNullOrWhiteSpace(employeeCode))
+        {
+            throw new ArgumentException("Employee code cannot be null or empty.", nameof(employeeCode));
+        }
+
         try
         {
             var result = await _employeeRepository.DeleteByCodeAsync(employeeCode);
             if (!result)
             {
                 _logger.Warning($"Employee with code {employeeCode} not found.");
+                return new Result(false, "Company not found.");
             }
-            return result;
+
+            return new Result(true, $"Company with code {employeeCode} was successfully deleted.");
         }
         catch (Exception ex) when (ex is ArgumentNullException || ex is InvalidOperationException || ex is EmployeeServiceException)
         {
             _logger.Error(new DatabaseException($"Error occurred while deleting employee by code: {employeeCode}", ex), ex.Message);
-            return false;
+            return new Result(false, "An error occurred while deleting the employee.");
         }
     }
 }

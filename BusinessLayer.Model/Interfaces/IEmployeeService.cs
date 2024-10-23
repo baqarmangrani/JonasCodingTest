@@ -10,6 +10,6 @@ namespace BusinessLayer.Model.Interfaces
         Task<EmployeeInfo> GetEmployeeByCodeAsync(string employeeCode);
         Task<Result> AddEmployeeAsync(EmployeeInfo employeeInfo);
         Task<Result> UpdateEmployeeByCodeAsync(string employeeCode, EmployeeInfo employeeInfo);
-        Task<bool> DeleteEmployeeByCodeAsync(string employeeCode);
+        Task<Result> DeleteEmployeeByCodeAsync(string employeeCode);
     }
 }
