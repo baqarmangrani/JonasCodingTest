@@ -1,6 +1,5 @@
 using AutoMapper;
 using BusinessLayer;
-using DataAccessLayer.Database;
 using DataAccessLayer.Model.Interfaces;
 using DataAccessLayer.Repositories;
 using Serilog;
