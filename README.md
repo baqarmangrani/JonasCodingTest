@@ -35,6 +35,7 @@ This project is a simple .NET Web API designed to manage company and employee in
 
 - **Visual Studio 2019 or higher**
 - **.NET Framework 4.7.2 SDK**
+- **Postman**
 
 ## Setup and Installation
 
@@ -56,6 +57,10 @@ This project is a simple .NET Web API designed to manage company and employee in
 4. **Run the Web API**
 
    Set `WebApi` as the startup project and run it.
+
+5. **Import the Postman Collection**
+
+   Call the endpoints
 
 ## Layers Description
 
