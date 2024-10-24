@@ -1,0 +1,271 @@
+{
+	"info": {
+		"_postman_id": "3d339a67-0a83-438b-a86b-1c275e4c09fa",
+		"name": "Company and Employee API",
+		"description": "API for managing companies and employees.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "4560925"
+	},
+	"item": [
+		{
+			"name": "Company API",
+			"item": [
+				{
+					"name": "Get All Companies",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/{{companiesUri}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"{{companiesUri}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Company by Code",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/{{companiesUri}}/COMP002",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"{{companiesUri}}",
+								"COMP002"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Company",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"SiteId\": \"123\",\n  \"CompanyCode\": \"COMP002\",\n  \"CompanyName\": \"Example Company\",\n  \"AddressLine1\": \"123 Main St\",\n  \"AddressLine2\": \"Suite 100\",\n  \"AddressLine3\": \"Building A\",\n  \"PostalZipCode\": \"12345\",\n  \"PhoneNumber\": \"123-456-7890\",\n  \"FaxNumber\": \"123-456-7891\",\n  \"EquipmentCompanyCode\": \"EQ001\",\n  \"Country\": \"USA\",\n  \"LastModified\": \"2023-10-01T12:00:00Z\",\n  \"ArSubledgers\": [\n    {\n      \"SiteId\": \"123\",\n      \"CompanyCode\": \"COMP001\",\n      \"ArSubledgerCode\": \"AR001\",\n      \"Description\": \"Accounts Receivable Subledger 1\",\n      \"CustomerName\": \"Customer A\",\n      \"AddressLine1\": \"456 Elm St\",\n      \"AddressLine2\": \"Apt 2B\",\n      \"AddressLine3\": \"\",\n      \"PostalZipCode\": \"67890\",\n      \"PhoneNumber\": \"987-654-3210\",\n      \"FaxNumber\": \"987-654-3211\",\n      \"LastModified\": \"2023-10-01T12:00:00Z\",\n      \"Active\": \"Yes\",\n      \"Inactive\": \"No\",\n      \"Excellent\": \"Yes\",\n      \"Good\": \"No\",\n      \"Fair\": \"No\",\n      \"Poor\": \"No\",\n      \"Condemned\": \"No\"\n    },\n    {\n      \"SiteId\": \"123\",\n      \"CompanyCode\": \"COMP001\",\n      \"ArSubledgerCode\": \"AR002\",\n      \"Description\": \"Accounts Receivable Subledger 2\",\n      \"CustomerName\": \"Customer B\",\n      \"AddressLine1\": \"789 Oak St\",\n      \"AddressLine2\": \"\",\n      \"AddressLine3\": \"\",\n      \"PostalZipCode\": \"54321\",\n      \"PhoneNumber\": \"321-654-9870\",\n      \"FaxNumber\": \"321-654-9871\",\n      \"LastModified\": \"2023-10-01T12:00:00Z\",\n      \"Active\": \"Yes\",\n      \"Inactive\": \"No\",\n      \"Excellent\": \"No\",\n      \"Good\": \"Yes\",\n      \"Fair\": \"No\",\n      \"Poor\": \"No\",\n      \"Condemned\": \"No\"\n    }\n  ]\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/{{companiesUri}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"{{companiesUri}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Company",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"SiteId\": \"123\",\n  \"CompanyCode\": \"COMP004\",\n  \"CompanyName\": \"Example Company 2\",\n  \"AddressLine1\": \"123 Main St\",\n  \"AddressLine2\": \"Suite 100\",\n  \"AddressLine3\": \"Building A\",\n  \"PostalZipCode\": \"12345\",\n  \"PhoneNumber\": \"123-456-7890\",\n  \"FaxNumber\": \"123-456-7891\",\n  \"EquipmentCompanyCode\": \"EQ001\",\n  \"Country\": \"USA\",\n  \"LastModified\": \"2023-10-01T12:00:00Z\",\n  \"ArSubledgers\": [\n    {\n      \"SiteId\": \"123\",\n      \"CompanyCode\": \"COMP001\",\n      \"ArSubledgerCode\": \"AR001\",\n      \"Description\": \"Accounts Receivable Subledger 1\",\n      \"CustomerName\": \"Customer A\",\n      \"AddressLine1\": \"456 Elm St\",\n      \"AddressLine2\": \"Apt 2B\",\n      \"AddressLine3\": \"\",\n      \"PostalZipCode\": \"67890\",\n      \"PhoneNumber\": \"987-654-3210\",\n      \"FaxNumber\": \"987-654-3211\",\n      \"LastModified\": \"2023-10-01T12:00:00Z\",\n      \"Active\": \"Yes\",\n      \"Inactive\": \"No\",\n      \"Excellent\": \"Yes\",\n      \"Good\": \"No\",\n      \"Fair\": \"No\",\n      \"Poor\": \"No\",\n      \"Condemned\": \"No\"\n    },\n    {\n      \"SiteId\": \"123\",\n      \"CompanyCode\": \"COMP001\",\n      \"ArSubledgerCode\": \"AR002\",\n      \"Description\": \"Accounts Receivable Subledger 2\",\n      \"CustomerName\": \"Customer B\",\n      \"AddressLine1\": \"789 Oak St\",\n      \"AddressLine2\": \"\",\n      \"AddressLine3\": \"\",\n      \"PostalZipCode\": \"54321\",\n      \"PhoneNumber\": \"321-654-9870\",\n      \"FaxNumber\": \"321-654-9871\",\n      \"LastModified\": \"2023-10-01T12:00:00Z\",\n      \"Active\": \"Yes\",\n      \"Inactive\": \"No\",\n      \"Excellent\": \"No\",\n      \"Good\": \"Yes\",\n      \"Fair\": \"No\",\n      \"Poor\": \"No\",\n      \"Condemned\": \"No\"\n    }\n  ]\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/{{companiesUri}}/COMP002",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"{{companiesUri}}",
+								"COMP002"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Company",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/{{companiesUri}}/COMP001",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"{{companiesUri}}",
+								"COMP001"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Employee API",
+			"item": [
+				{
+					"name": "Get All Employees",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/{{employeesUri}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"{{employeesUri}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Employee by Code",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/{{employeesUri}}/E12345",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"{{employeesUri}}",
+								"E12345"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Employee",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"EmployeeCode\": \"E12345\",\n    \"EmployeeName\": \"John Doe\",\n    \"CompanyName\": \"Example Company\",\n    \"OccupationName\": \"Software Engineer\",\n    \"EmployeeStatus\": \"Active\",\n    \"EmailAddress\": \"john.doe@techcorp.com\",\n    \"PhoneNumber\": \"123-456-7890\",\n    \"LastModifiedDateTime\": \"2023-10-01T12:34:56Z\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/{{employeesUri}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"{{employeesUri}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Employee",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"EmployeeCode\": \"E12345\",\n    \"EmployeeName\": \"John Doe2222\",\n    \"CompanyName\": \"Example Company\",\n    \"OccupationName\": \"Software Engineer\",\n    \"EmployeeStatus\": \"Active\",\n    \"EmailAddress\": \"john.doe@techcorp.com\",\n    \"PhoneNumber\": \"123-456-7890\",\n    \"LastModifiedDateTime\": \"2023-10-01T12:34:56Z\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/{{employeesUri}}/E12345",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"{{employeesUri}}",
+								"E12345"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Employee",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/{{employeesUri}}/E12345",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"{{employeesUri}}",
+								"E12345"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:51480",
+			"type": "default"
+		},
+		{
+			"key": "companiesUri",
+			"value": "api/companies"
+		},
+		{
+			"key": "employeesUri",
+			"value": "api/employees",
+			"type": "string"
+		}
+	]
+}
