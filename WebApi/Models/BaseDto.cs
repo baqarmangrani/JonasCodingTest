@@ -1,6 +1,6 @@
-﻿namespace DataAccessLayer.Model.Models
+﻿namespace WebApi.Models
 {
-    public class DataEntity
+    public class BaseDto
     {
         public string SiteId { get; set; }
         public string CompanyCode { get; set; }

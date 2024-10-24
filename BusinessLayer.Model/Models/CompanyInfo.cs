@@ -14,7 +14,7 @@ namespace BusinessLayer.Model.Models
         public string FaxNumber { get; set; }
         public string EquipmentCompanyCode { get; set; }
         public string Country { get; set; }
-        public  List<ArSubledgerInfo> ArSubledgers { get; set; }
+        public List<ArSubledgerInfo> ArSubledgers { get; set; }
         public DateTime LastModified { get; set; }
     }
 }
